@@ -1,0 +1,40 @@
+NAME = ice-grid
+VTYPE = z
+MAPTYPE = k
+DATA = conf/new_grid_ice.nc
+XVARNAME = lon
+YVARNAME = lat
+ZVARNAME = zt
+DEPTHVARNAME = depth_t
+NUMLEVELSVARNAME = num_levels
+
+NAME = ocn-grid
+VTYPE = z
+MAPTYPE = k
+DATA = conf/new_grid_ocean.nc
+XVARNAME = lon
+YVARNAME = lat
+ZVARNAME = zt
+DEPTHVARNAME = depth_t
+NUMLEVELSVARNAME = num_levels
+
+NAME = ice-grid-vel
+VTYPE = z
+MAPTYPE = k
+DATA = conf/grid_spec_180.nc
+XVARNAME = lon
+YVARNAME = lat
+ZVARNAME = zt
+DEPTHVARNAME = depth_t
+NUMLEVELSVARNAME = num_levels
+
+NAME = ocn-grid-vel
+VTYPE = z
+MAPTYPE = k
+DATA = conf/grid_spec2_180.nc
+XVARNAME = lon
+YVARNAME = lat
+ZVARNAME = zt
+DEPTHVARNAME = depth_t
+NUMLEVELSVARNAME = num_levels
+

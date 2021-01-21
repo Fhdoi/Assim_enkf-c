@@ -1,0 +1,7 @@
+PRODUCT = ALL
+TYPE = SIC_OSI
+READER = xy_gridded
+FILE = obs/OSISAF/this_day.nc
+PARAMETER VARNAME = ice_conc
+ERROR_STD = 1 MU
+

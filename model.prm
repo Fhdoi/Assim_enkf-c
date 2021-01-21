@@ -1,0 +1,54 @@
+NAME = CICE
+
+VAR = aice
+GRID = ice-grid
+VAR = aiceosi
+GRID = ice-grid
+VAR = aicen
+GRID = ice-grid
+VAR = vice
+GRID = ice-grid
+VAR = vicen
+GRID = ice-grid
+VAR = vsnon
+GRID = ice-grid
+VAR = qice001
+GRID = ice-grid
+VAR = qice002
+GRID = ice-grid
+VAR = qice003
+GRID = ice-grid
+VAR = qice004
+GRID = ice-grid
+VAR = qice005
+GRID = ice-grid
+VAR = qice006
+GRID = ice-grid
+VAR = qice007
+GRID = ice-grid
+VAR = sice001
+GRID = ice-grid
+VAR = sice002
+GRID = ice-grid
+VAR = sice003
+GRID = ice-grid
+VAR = sice004
+GRID = ice-grid
+VAR = sice005
+GRID = ice-grid
+VAR = sice006
+GRID = ice-grid
+VAR = sice007
+GRID = ice-grid
+
+
+VAR = temp
+GRID = ocn-grid
+VAR = salt
+GRID = ocn-grid
+VAR = sst
+GRID = ocn-grid
+VAR = sss
+GRID = ocn-grid
+
+

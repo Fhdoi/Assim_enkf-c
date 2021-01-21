@@ -1,3 +1,8 @@
+#Project specific
+core
+*.nc
+
+#General python specific pre generated
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
