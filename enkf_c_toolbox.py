@@ -12,8 +12,24 @@ import numpy as np
 import os
 import sys
 import copy
-
+import subprocess
 from scipy.ndimage import uniform_filter
+
+def cmd(command):
+    """Function runs provided command in the system shell.
+
+    Args:
+        command (string) : Command to be executed in shell
+    Returns:
+        result (integer) : Shell returned status of command
+    """
+    print("> " + command)
+    result = subprocess.call(command, shell = True)
+
+    if result != 0:
+        print("Command failed: %d" % result)
+    else:
+        return result
 
 # Rewrite the model output to files recognized by the enkf-c
 def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_var,Nens):
@@ -617,4 +633,31 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
 
 
             #old_var = new_var
+
+
+def get_osisaf_obs(date,obs_dir,Assim_dir):
+    #osisaf_pre = 'ice_conc_nh_ease-125_multi_'
+    osisaf_pre = 'ice_conc_nh_polstere-100_multi_'
+    osisaf_post = '1200.nc'
+    smnd = str(date.month) if date.month > 9 else '0'+str(date.month)
+    sday = str(date.day) if date.day > 9 else '0'+str(date.day)
+
+    obs_file = obs_dir+str(date.year)+'/'+smnd+'/'+osisaf_pre+str(date.year)+smnd+sday+osisaf_post
+
+    file_out = Assim_dir +'/obs/OSISAF/this_day.nc'
+
+    # Export concentraion and uncertainty
+    cmd('ncks -O -v ice_conc,total_uncertainty '+obs_file+' temp_osisaf1.nc')
+    # Rename uncertainty to that read by enkf-c
+    cmd('ncrename -v total_uncertainty,error_std temp_osisaf1.nc')
+    # Change dimension from percent to decimal concentration
+    cmd('ncap2 -O -s "ice_conc=ice_conc/100" temp_osisaf1.nc temp_osisaf2.nc')
+    cmd('ncap2 -O -s "error_std=error_std/100" temp_osisaf2.nc '+file_out)
+
+    # Fix nan values 
+    cmd('ncatted -O -h -a _FillValue,error_std,m,f,-1 '+file_out)
+    cmd('ncatted -O -h -a _FillValue,ice_conc,m,f,-1 '+file_out)
+
+    # delete temporary files
+    cmd('rm temp_osisaf1.nc temp_osisaf2.nc')
         
