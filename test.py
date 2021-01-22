@@ -3,6 +3,7 @@ from datetime import datetime
 import netCDF4 as nc
 import numpy as np
 import sys
+from shutil import copyfile
 
 Prep = False
 Assimilate = False
@@ -41,7 +42,12 @@ if computer == 'met_local':
     Nens = 10 # This is maximum value, but not neccesarily the number used.
     ens_count = 10 # This should probably be output of prep!!!!
 elif computer == 'nebula':
-    sys.exit(computer+' not yet implementet')
+    res_dir = '/nobackup/forsk/sm_sinfr/Results/barents/'
+    grid_dir = '/home/sm_sinfr/metroms_apps/barents-2.5km/grid/barents_grd.nc'
+    enkf_c_dir = "/nobackup/forsk/sm_sinfr/Assim_enkf-c/"
+    obs_dir = '/nobackup/forsk/sm_sinfr/Observations/'
+    Nens = 10 # This is maximum value, but not neccesarily the number used.
+    ens_count = 10 # This should probably be output of prep!!!!
 elif computer == 'fram':
     sys.exit(computer+' not yet implementet')
 else:
@@ -70,6 +76,7 @@ if Obs:
 
 # run the assimlation
 if Assimilate:
+    copyfile(enkf_c_dir+'bld/'+'Makefile.'+computer,enkf_c_dir+'Makefile)
     et.cmd('make enkf')
 
 #Update the ensemble
