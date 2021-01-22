@@ -8,6 +8,7 @@ enkf_update
 ensemble_6565/*.nc
 ensemble_6565/
 files_in_ensemble
+Makefile
 
 #General python specific pre generated
 # Byte-compiled / optimized / DLL files

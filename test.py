@@ -8,7 +8,7 @@ from shutil import copyfile
 Prep = False
 Assimilate = False
 Update = False
-Write_res = False
+Write = False
 Obs = False
 
 mode = input("What to do?[Prep,Assimilate,Update,Write,Obs,All]: ") 
@@ -76,7 +76,7 @@ if Obs:
 
 # run the assimlation
 if Assimilate:
-    copyfile(enkf_c_dir+'bld/'+'Makefile.'+computer,enkf_c_dir+'Makefile)
+    copyfile(enkf_c_dir+'bld/'+'Makefile.'+computer,enkf_c_dir+'Makefile')
     et.cmd('make enkf')
 
 #Update the ensemble

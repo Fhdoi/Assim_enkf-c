@@ -515,6 +515,10 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
     qices = ['qice001','qice002','qice003','qice004','qice005','qice006','qice007']
     sices = ['sice001','sice002','sice003','sice004','sice005','sice006','sice007']
 
+    not_update = ['aicen','vicen','vsnon','temp','salt','qice001','qice002','qice003','qice004',
+            'qice005','qice006','qice007','sice001','sice002','sice003','sice004',
+            'sice005','sice006','sice007']
+
     # Make sure that aicen is first in the list of variables such that this can be used for the other variables  
     if EnKF_var.index("aicen") != 0:
         # Switch aicen with the variable that is first in the list
@@ -539,7 +543,10 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
             
             for var in org_ds.variables.keys():
                 if var in EnKF_var:
-                    fn = enkf_c_dir+'ensemble_6565/mem0'+num+'_'+var+'.nc.analysis'
+                    if var in not_update:
+                        fn = enkf_c_dir+'ensemble_6565/mem0'+num+'_'+var+'.nc'
+                    else:
+                        fn = enkf_c_dir+'ensemble_6565/mem0'+num+'_'+var+'.nc.analysis'
                     mem_ds = nc.Dataset(fn, 'r', format='NETCDF4')
                     #print(fn)
                     #print(file)
@@ -579,7 +586,7 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
 
                     if var == 'aicen':                        
                         # Check ice boundaries
-                        temp[temp < 0] = 0
+                        temp[temp < 0.01] = 0
                         temp[temp > 1] = 1
                         # Check that aggregated concentraion is less than 1
                         temsum = np.sum(temp,axis=1)
