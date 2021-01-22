@@ -579,9 +579,11 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                             temp = temp2
 
                     if var == 'temp':
-                        # Temperature cannot be below minus 2    
+                        # Temperature cannot be below minus 2 
+                        temp = temp.fillna(0)   
                         temp[temp < -2] = -2
                     if var == 'salt':
+                        temp = temp.fillna(35)
                         # Salinity cannot be less than 0    
                         temp[temp < 0] = 0
 
