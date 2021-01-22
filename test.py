@@ -1,4 +1,4 @@
-import enkf_c_toolbox as et
+import python_tools.enkf_c_toolbox as et
 from datetime import datetime
 import netCDF4 as nc
 import numpy as np
@@ -10,15 +10,15 @@ Update = False
 Write_res = False
 Obs = False
 
-mode = input("What to do?[Prep,Assimilate,Update,Write_res,Obs,All]: ") 
+mode = input("What to do?[Prep,Assimilate,Update,Write,Obs,All]: ") 
 if mode == 'Prep':
     Prep = True
 elif mode == 'Assimilate':
     Assimilate = True
 elif mode == 'Update':
     Update = True
-elif mode == 'Write_res':
-    Write_res = True
+elif mode == 'Write':
+    Write = True
 elif mode == 'Obs':
     Obs = True
 elif mode == 'All':
@@ -38,7 +38,8 @@ if computer == 'met_local':
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
     enkf_c_dir = "/home/sindremf/PHD2/Work/Assim_enkf-c/"
     obs_dir = '/home/sindremf/PHD2/Work/Observations/'
-    Nens = 10
+    Nens = 10 # This is maximum value, but not neccesarily the number used.
+    ens_count = 10 # This should probably be output of prep!!!!
 elif computer == 'nebula':
     sys.exit(computer+' not yet implementet')
 elif computer == 'fram':
@@ -49,14 +50,15 @@ else:
 res_type = 'ice'
 EnKF_var = ['aicen','vicen','temp','salt','qice001','qice002','qice003','qice004',
             'qice005','qice006','qice007','sice001','sice002','sice003','sice004',
-            'sice005','sice006','sice007']
+            'sice005','sice006','sice007','vsnon']
 
 
 
 
 # Prep the ensemble
 if Prep:
-    et.Prep_ensemble(ens_date = end_date, grid_dir=grid_dir, 
+    #Return Nens!!!
+    ens_count = et.Prep_ensemble(ens_date = end_date, grid_dir=grid_dir, 
                      ens_inn_dir=res_dir, enkf_c_dir =enkf_c_dir, 
                      res_type = 'ice', EnKF_var=EnKF_var,
                      Nens = Nens)
@@ -76,4 +78,5 @@ if Update:
 
 
 #Write important results to file.
-#if Write_res:
+if Write:
+    et.write_results(date=end_date,enkf_c_dir=enkf_c_dir,ens_out_dir=res_dir, Nens=ens_count)
