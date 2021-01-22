@@ -638,7 +638,11 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                         # Make sure that new ice is also updated if missed by the assimilation
                         # Assume that the new thickness is very thin, vicen=aicen just for simplicity,
                         # this is not really expected to happen, but can cause numerical errors
-                        temp = np.maximum(temp,aicen)                        
+                        temp = np.maximum(temp,aicen)  
+
+                    if var == 'vsnon':                        
+                        temp[temp < 0] = 0
+                        temp[aicen == 0] = 0                      
                        
                     if pre == 'iced.':
                         old_var[:] = temp[0]
