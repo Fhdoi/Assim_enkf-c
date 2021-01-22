@@ -57,6 +57,7 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
     #for ff in glob.glob(folder+file_dummy):
     #    file1.writelines(ff+'\n')
     prescripts = ['iced.','ocean.']
+    prescripts = ['ocean.']
     syear = str(ens_date.year)
     smnd = str(ens_date.month)
     if ens_date.month < 10:
@@ -90,17 +91,19 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
                 if iens2 < 10:
                     sens = '0'+sens
                 
-                file_handle = nc.Dataset(file, mode='r')
+                file_handle = xr.open_dataset(file)
                 if pre == 'ocean.':
                     ens_count +=1
                     # Write the file name to the member files folder
                     # No need to wrote it two times as both files are assumed to exist
                     file_ens.writelines(s1ens+'\n')
                     # The ocean restart files can contain several restart times.
-                    file_time = file_handle.variables['ocean_time']
-                    target_num = nc.date2num(ens_date, units=file_time.units,
-                                 calendar=file_time.calendar)
-                    date_index = np.where(np.array(file_time[:]) == target_num)[0]
+                    #file_time = file_handle.variables['ocean_time']
+                    #target_num = nc.date2num(ens_date, units=file_time.units,
+                    #             calendar=file_time.calendar)
+                    #date_index = np.where(np.array(file_time[:]) == target_num)[0]
+                    # Må bare konverte Xarray output til num også tror jeg
+                    date_index = 0 # Denne må fikses!!!!!!
                 
                 elif pre == 'iced.':
                     date_index = 0
@@ -125,7 +128,7 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
                         fn = enkf_c_dir+'ensemble_6565/mem'+sens+'_'+var+'.nc'
                         ds = nc.Dataset(fn, 'w', format='NETCDF4')
 
-                        var_inn = file_handle.variables[var]
+                        var_inn = file_handle[var]
 
                         # Litt usikker på om jeg skal ha time, 
                         # teste om det har noe å si på assimilasjonen
@@ -149,7 +152,8 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
                             dzs[:] = np.arange(0, var_inn.shape[1], 1.0)
                             
                             if pre == 'ocean.':
-                                temps[:,:,:,:] = var_inn[date_index,:,:,:]
+                                var_inn = var_inn.fillna(0)
+                                temps[0,:,:,:] = var_inn[date_index,:,:,:]
                             else:
                                 sys.exit('Not implemented for ice!')
 
@@ -279,8 +283,13 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
                             if var == 'temp':
                                 sst.units = 'degrees C'
 
-                            times[:] = file_time[date_index]
-                            times.units = file_time.units
+                            times[:] = nc.date2num(ens_date, units='days since 1990-01-01',
+                             calendar='gregorian')
+                            times.units = 'days since 1990-01-01'
+                            times.calendar='gregorian'
+
+                            #times[:] = file_time[date_index]
+                            #times.units = file_time.units
 
                             dxs[:] = np.arange(0, var_inn.shape[2], 1.0)
                             dys[:] = np.arange(0, var_inn.shape[3], 1.0)
@@ -579,11 +588,9 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                             temp = temp2
 
                     if var == 'temp':
-                        # Temperature cannot be below minus 2 
-                        temp = temp.fillna(0)   
+                        # Temperature cannot be below minus 2    
                         temp[temp < -2] = -2
                     if var == 'salt':
-                        temp = temp.fillna(35)
                         # Salinity cannot be less than 0    
                         temp[temp < 0] = 0
 
@@ -664,7 +671,7 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                     mem_ds.close()
             org_ds.close()
 
-
+    file_ens.close()
             #old_var = new_var
 
 
