@@ -615,18 +615,27 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                     if var == 'Tsfcn':
                         temp[aicen == 0] = 0
                         temp[temp > 0] = 0
+                        temp[temp < -20] = -20
 
                     if var in qices:
                         # set value of new data to -1e8
                         temp[temp > 0] = 0
+                        temp[temp < -3.6e8] = -3.6e8
                         for i in range(temp.shape[1]):
-                            temp[:,i,:,:] = np.minimum(temp[:,i,:,:],aice1*-1e8)
+                            temp[:,i,:,:] = np.minimum(temp[:,i,:,:],aice1*-1.2e8)
 
                     if var in sices:
                         temp[temp < 0] = 0
+                        temp[temp > 31] = 31
                         # set value of new data to 4
                         for i in range(temp.shape[1]):
                             temp[:,i,:,:] = np.maximum(temp[:,i,:,:],aice1*4)
+        
+                    if var == 'qsno001':
+                        temp[temp > 0] = 0
+                        temp[temp < -1.4e8] = -1.4e8
+                        for i in range(temp.shape[1]):
+                            temp[:,i,:,:] = np.minimum(temp[:,i,:,:],aice1*-1.2e8)
                         
 
                     if var == 'vicen':                        
