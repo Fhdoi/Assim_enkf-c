@@ -1,5 +1,5 @@
-NP_CALC = 4
-NP_UPDATE = 4
+NP_CALC = 20
+NP_UPDATE = 20
 
 enkf: clean enkf-prep enkf-calc enkf-update
 
