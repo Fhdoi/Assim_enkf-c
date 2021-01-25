@@ -745,7 +745,7 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens):
     times.units = 'days since 1990-01-01'
     times.calendar='gregorian'
 
-    de = ds.createDimension('de', 10)   # Ens
+    de = ds.createDimension('de', Nens)   # Ens
     di = ds.createDimension('di', 5)    # Ice categories
     dz = ds.createDimension('dz', temp.shape[1])    # Depth levels
     dx = ds.createDimension('dx', temp.shape[2])
@@ -758,7 +758,8 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens):
     dxs = ds.createVariable('dx', 'f4', ('dx',))
     dys = ds.createVariable('dy', 'f4', ('dy',))
 
-
+    #print(Nens)
+    #print(np.arange(0, Nens, 1.0))
     des[:] = np.arange(0, Nens, 1.0)
     dis[:] = np.arange(0, 5, 1.0)
     dzs[:] = np.arange(0, temp.shape[1], 1.0)

@@ -92,4 +92,9 @@ if Update:
 
 #Write important results to file.
 if Write:
+    # Kun for testing! Blir lagret etter prep i det operasjonelle!
+    file_ens = open(enkf_c_dir+'files_in_ensemble', 'r') 
+    Lines = file_ens.readlines()
+    ens_count = len(Lines)
+    ###############################
     et.write_results(date=end_date,enkf_c_dir=enkf_c_dir,ens_out_dir=res_dir, Nens=ens_count)
