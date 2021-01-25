@@ -26,6 +26,8 @@ VAR = qice006
 GRID = ice-grid
 VAR = qice007
 GRID = ice-grid
+VAR = qsno001
+GRID = ice-grid
 VAR = sice001
 GRID = ice-grid
 VAR = sice002
@@ -40,7 +42,8 @@ VAR = sice006
 GRID = ice-grid
 VAR = sice007
 GRID = ice-grid
-
+VAR = Tsfcn
+GRID = ice-grid
 
 VAR = temp
 GRID = ocn-grid

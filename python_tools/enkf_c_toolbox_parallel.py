@@ -562,7 +562,7 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
     #not_update = ['aicen','vicen','vsnon','temp','salt','qice001','qice002','qice003',
     #            'qice004','qice005','qice006','qice007','sice001','sice002','sice003', 
     #            'sice004','sice005','sice006','sice007','Tsfcn']
-    not_update = []
+    not_update = ['']
     file_count = int(ll) # This assumes that all ensembles are availible, fix later
     for pre in prescripts:
         file = ens_out_dir+pre+syear+smnd+sday+'_'+ll[0:-1]+'.nc'        
@@ -645,7 +645,7 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                     temp[aicen == 0] = 0
                 
                 if var == 'Tsfcn':
-                    temp[aicen == 0] = 0
+                    temp[aicen == 0] = -1.8
                     temp[temp > 0] = 0
                     temp[temp < -20] = -20
 
@@ -668,6 +668,7 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                     temp[temp < -1.4e8] = -1.4e8
                     for i in range(temp.shape[1]):
                         temp[:,i,:,:] = np.minimum(temp[:,i,:,:],aice1*-1.2e8)
+                    temp[vsno == 0] = 0
                     
 
                 if var == 'vicen':                        
@@ -685,7 +686,8 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
 
                 if var == 'vsnon':                        
                     temp[temp < 0] = 0
-                    temp[aicen == 0] = 0                      
+                    temp[aicen == 0] = 0
+                    vsno = np.sum(temp,axis=1)                
                    
                 if pre == 'iced.':
                     old_var[:] = temp[0]

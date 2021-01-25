@@ -56,8 +56,8 @@ else:
 
 res_type = 'ice'
 EnKF_var = ['aicen','vicen','temp','salt','qice001','qice002','qice003','qice004',
-            'qice005','qice006','qice007','sice001','sice002','sice003','sice004',
-            'sice005','sice006','sice007','vsnon', 'Tsfnc']
+            'qice005','qice006','qice007','qsno001','sice001','sice002','sice003','sice004',
+            'sice005','sice006','sice007','vsnon', 'Tsfcn']
 
 # Write which and how many ensemble members that are ready
 
