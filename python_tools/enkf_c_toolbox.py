@@ -57,7 +57,6 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
     #for ff in glob.glob(folder+file_dummy):
     #    file1.writelines(ff+'\n')
     prescripts = ['iced.','ocean.']
-    prescripts = ['ocean.']
     syear = str(ens_date.year)
     smnd = str(ens_date.month)
     if ens_date.month < 10:
@@ -152,7 +151,9 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
                             dzs[:] = np.arange(0, var_inn.shape[1], 1.0)
                             
                             if pre == 'ocean.':
+                                # a bit uncertain if it is nan or very high so include both
                                 var_inn = var_inn.fillna(0)
+                                var_inn.values[:][var_inn.values[:] > 100] = 0
                                 temps[0,:,:,:] = var_inn[date_index,:,:,:]
                             else:
                                 sys.exit('Not implemented for ice!')

@@ -9,6 +9,7 @@ ensemble_6565/*.nc
 ensemble_6565/
 files_in_ensemble
 Makefile
+python_tools/temp.py
 
 #General python specific pre generated
 # Byte-compiled / optimized / DLL files

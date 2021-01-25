@@ -1,4 +1,4 @@
-import python_tools.enkf_c_toolbox as et
+import python_tools.enkf_c_toolbox_parallel as et
 from datetime import datetime
 import netCDF4 as nc
 import numpy as np
@@ -58,13 +58,14 @@ EnKF_var = ['aicen','vicen','temp','salt','qice001','qice002','qice003','qice004
             'qice005','qice006','qice007','sice001','sice002','sice003','sice004',
             'sice005','sice006','sice007','vsnon', 'Tsfnc']
 
-
+# Write which and how many ensemble members that are ready
+ens_count = et.count_ens(enkf_c_dir=enkf_c_dir,res_dir=res_dir)
 
 
 # Prep the ensemble
 if Prep:
     #Return Nens!!!
-    ens_count = et.Prep_ensemble(ens_date = end_date, grid_dir=grid_dir, 
+    et.Prep_ensemble(ens_date = end_date, grid_dir=grid_dir, 
                      ens_inn_dir=res_dir, enkf_c_dir =enkf_c_dir, 
                      res_type = 'ice', EnKF_var=EnKF_var,
                      Nens = Nens)
