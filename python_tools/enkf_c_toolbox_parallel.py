@@ -677,9 +677,11 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                     temp[aicen == 0] = 0
         
                     # Make sure that new ice is also updated if missed by the assimilation
-                    # Assume that the new thickness is very thin, vicen=aicen just for simplicity,
+                    # Assume that the new thickness is very thin, vicen=0.1aicen just for simplicity,
                     # this is not really expected to happen, but can cause numerical errors
-                    temp = np.maximum(temp,aicen)  
+                    # Dette er jo kun hvis vicen = 0!  
+                    # Definitly not the best way to do this!!!!                  
+                    temp = np.maximum(temp,0.1*aicen)  
 
                 if var == 'vsnon':                        
                     temp[temp < 0] = 0
