@@ -668,7 +668,9 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                     temp[temp < -1.4e8] = -1.4e8
                     for i in range(temp.shape[1]):
                         temp[:,i,:,:] = np.minimum(temp[:,i,:,:],aice1*-1.2e8)
-                    temp[vsno == 0] = 0
+                        ttemp = temp[:,i,:,:]
+                        ttemp[vsno == 0] = 0
+                        temp[:,i,:,:] = ttemp
                     
 
                 if var == 'vicen':                        
