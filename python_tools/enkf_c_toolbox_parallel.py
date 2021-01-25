@@ -25,7 +25,7 @@ def count_ens(date,enkf_c_dir, res_dir):
     smnd = str(date.month) if date.month > 9 else '0'+str(date.month)
     sday = str(date.day) if date.day > 9 else '0'+str(date.day)
     file_ens = open(enkf_c_dir+'files_in_ensemble', "w")
-    files = glob.glob(res_dir+'iced.'+str(date.year)+smnd+sday+'*')
+    files = glob.glob(res_dir+'iced.'+str(date.year)+smnd+sday+'*').sort()
     for file in files:
         sens = file[-6:-3]
         file_ens.writelines(sens+'\n')
