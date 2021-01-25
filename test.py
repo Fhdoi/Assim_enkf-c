@@ -10,6 +10,7 @@ Assimilate = False
 Update = False
 Write = False
 Obs = False
+ens_count = False
 
 mode = input("What to do?[Prep,Assimilate,Update,Write,Obs,All]: ") 
 if mode == 'Prep':
@@ -22,6 +23,8 @@ elif mode == 'Write':
     Write = True
 elif mode == 'Obs':
     Obs = True
+elif mode == 'ens_count':
+    ens_count = True
 elif mode == 'All':
     Prep = True
     Assimilate = True
@@ -40,14 +43,12 @@ if computer == 'met_local':
     enkf_c_dir = "/home/sindremf/PHD2/Work/Assim_enkf-c/"
     obs_dir = '/home/sindremf/PHD2/Work/Observations/'
     Nens = 10 # This is maximum value, but not neccesarily the number used.
-    ens_count = 10 # This should probably be output of prep!!!!
 elif computer == 'nebula':
     res_dir = '/nobackup/forsk/sm_sinfr/Results/barents/'
     grid_dir = '/home/sm_sinfr/metroms_apps/barents-2.5km/grid/barents_grd.nc'
     enkf_c_dir = "/nobackup/forsk/sm_sinfr/Assim_enkf-c/"
     obs_dir = '/nobackup/forsk/sm_sinfr/Observations/'
     Nens = 10 # This is maximum value, but not neccesarily the number used.
-    ens_count = 10 # This should probably be output of prep!!!!
 elif computer == 'fram':
     sys.exit(computer+' not yet implementet')
 else:
@@ -59,8 +60,11 @@ EnKF_var = ['aicen','vicen','temp','salt','qice001','qice002','qice003','qice004
             'sice005','sice006','sice007','vsnon', 'Tsfnc']
 
 # Write which and how many ensemble members that are ready
-ens_count = et.count_ens(enkf_c_dir=enkf_c_dir,res_dir=res_dir)
 
+# this one is only for testing, more correct to do this within prep in case more ensembles are
+# finishing during assimilation
+if ens_count:
+    ens_count = et.count_ens(date=end_date,enkf_c_dir=enkf_c_dir,res_dir=res_dir)
 
 # Prep the ensemble
 if Prep:
@@ -69,6 +73,7 @@ if Prep:
                      ens_inn_dir=res_dir, enkf_c_dir =enkf_c_dir, 
                      res_type = 'ice', EnKF_var=EnKF_var,
                      Nens = Nens)
+    ens_count = et.count_ens(date=end_date,enkf_c_dir=enkf_c_dir,res_dir=res_dir)
 
 # copy and prep observations
 # See also Keguang code for download
