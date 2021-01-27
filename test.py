@@ -29,14 +29,14 @@ elif mode == 'All':
     Prep = True
     Assimilate = True
     Update = True 
-    Write_res = True
+    Write = True
     Obs = True
 else:
     sys.exit(mode+' is not implemented yet')
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,1,15)
+end_date = datetime(2018,1,22)
 if computer == 'met_local':
     res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
@@ -48,6 +48,7 @@ elif computer == 'nebula':
     grid_dir = '/home/sm_sinfr/metroms_apps/barents-2.5km/grid/barents_grd.nc'
     enkf_c_dir = "/nobackup/forsk/sm_sinfr/Assim_enkf-c/"
     obs_dir = '/nobackup/forsk/sm_sinfr/Observations/'
+    save_dir = '/nobackup/forsk/sm_sinfr/Results/Assim_res/'
     Nens = 10 # This is maximum value, but not neccesarily the number used.
 elif computer == 'fram':
     sys.exit(computer+' not yet implementet')
@@ -97,4 +98,4 @@ if Write:
     Lines = file_ens.readlines()
     ens_count = len(Lines)
     ###############################
-    et.write_results(date=end_date,enkf_c_dir=enkf_c_dir,ens_out_dir=res_dir, Nens=ens_count)
+    et.write_results(date=end_date,enkf_c_dir=enkf_c_dir,ens_out_dir=res_dir, Nens=ens_count, save_dir=save_dir)

@@ -726,11 +726,11 @@ def get_osisaf_obs(date,obs_dir,Assim_dir):
     # delete temporary files
     cmd('rm temp_osisaf1.nc temp_osisaf2.nc')
 
-def write_results(date,enkf_c_dir,ens_out_dir,Nens):
+def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
     
     smnd = str(date.month) if date.month > 9 else '0'+str(date.month)
     sday = str(date.day) if date.day > 9 else '0'+str(date.day)
-    file = enkf_c_dir +'Assim_summary_'+str(date.year)+smnd+sday+'.nc'
+    file = save_dir +'Assim_summary_'+str(date.year)+smnd+sday+'.nc'
 
     # Generate the netcdf, shoudl contain aice, vice, before and after in addition,
     # mem1 aicen before and after and sst and vice
