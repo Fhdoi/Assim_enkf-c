@@ -5,3 +5,10 @@ FILE = obs/OSISAF/this_day.nc
 PARAMETER VARNAME = ice_conc
 ERROR_STD = 1 MU
 
+PRODUCT = ALL
+TYPE = SIC_AMSR
+READER = xy_gridded
+FILE = obs/AMSR/this_day.nc
+PARAMETER VARNAME = iceconc
+ERROR_STD = 1 MU
+

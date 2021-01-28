@@ -1,9 +1,11 @@
 import python_tools.enkf_c_toolbox_parallel as et
+import python_tools.Obs_sindre as ob
 from datetime import datetime
 import netCDF4 as nc
 import numpy as np
 import sys
 from shutil import copyfile
+import os
 
 Prep = False
 Assimilate = False
@@ -36,7 +38,7 @@ else:
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,1,22)
+end_date = datetime(2018,1,15)
 if computer == 'met_local':
     res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
@@ -79,7 +81,22 @@ if Prep:
 # copy and prep observations
 # See also Keguang code for download
 if Obs:
-    et.get_osisaf_obs(date=end_date,obs_dir=obs_dir+'/Org_OSISAF/', Assim_dir=enkf_c_dir)
+    ob.prep_osisaf_obs(date=end_date,obs_dir=obs_dir+'/Org_OSISAF/', Assim_dir=enkf_c_dir)
+    # Copy the AMSR observation from obs directory
+    
+    file_amsr_inn = obs_dir+'AMSR_observations/'+'amsr2_'+end_date.strftime('%Y%m%d')+'.nc'
+    file_amsr_out = enkf_c_dir+'obs/AMSR/this_day.nc'
+    if os.path.exists(file_amsr_inn):
+        copyfile(file_amsr_inn,file_amsr_out)
+    else:
+        print('AMSR file not availible: '+file_amsr_inn)
+        
+        try:
+            os.remove(file_amsr_out)
+        except:
+            pass
+        
+    
 
 # run the assimlation
 if Assimilate:
