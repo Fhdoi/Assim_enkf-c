@@ -38,7 +38,7 @@ else:
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,1,15)
+end_date = datetime(2018,1,8)
 if computer == 'met_local':
     res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
@@ -53,7 +53,12 @@ elif computer == 'nebula':
     save_dir = '/nobackup/forsk/sm_sinfr/Results/Assim_res/'
     Nens = 10 # This is maximum value, but not neccesarily the number used.
 elif computer == 'fram':
-    sys.exit(computer+' not yet implementet')
+    res_dir = '/cluster/work/users/sfr009/Results/barents/'
+    grid_dir = '/cluster/home/sfr009/metroms_apps/barents-2.5km/grid/barents_grd.nc'
+    enkf_c_dir = '/cluster/work/users/sfr009/Assim_enkf-c/'
+    obs_dir = '/cluster/work/users/sfr009/Observations/'
+    save_dir = '/cluster/work/users/sfr009/Results/Assim_res/'
+    Nens = 10 # This is maximum value, but not neccesarily the number used.
 else:
     sys.exit(computer+' not yet implementet')
 
