@@ -853,29 +853,64 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
     # With several observations potentially a list of string could be used here,
     #OSISAF
     file_osisaf = enkf_c_dir+'obs/OSISAF/this_day.nc'
+    file_amsr = enkf_c_dir+'obs/AMSR/this_day.nc'
     grid_file = enkf_c_dir+'conf/new_grid_ice.nc'
 
-    handle = xr.open_dataset(file_osisaf)
-    ice_conc = handle['ice_conc']
-    lon_obs = handle['lon']
-    lat_obs = handle['lat']
-    obs_grid_def = geometry.GridDefinition(lons=lon_obs, lats=lat_obs)
+
+    time = ds.createDimension('Nens', None)
+    Obs1 = ds.createVariable('Obs1', 'f4', ('time','dx', 'dy','Nens',))
+    
+    osi = False
+    if os.path.exists(file_osisaf)
+        osi = True
+        handle = xr.open_dataset(file_osisaf)
+        ice_conc = handle['ice_conc']
+        lon_obs = handle['lon']
+        lat_obs = handle['lat']
+        obs_grid_def = geometry.GridDefinition(lons=lon_obs, lats=lat_obs)
 
 
-    handle2 = xr.open_dataset(grid_file)
-    lon_mod = handle2['lon']
-    lat_mod = handle2['lat']
-    mod_grid_def = geometry.GridDefinition(lons=lon_mod, lats=lat_mod)
+        handle2 = xr.open_dataset(grid_file)
+        lon_mod = handle2['lon']
+        lat_mod = handle2['lat']
+        mod_grid_def = geometry.GridDefinition(lons=lon_mod, lats=lat_mod)
 
-    # Fix future warning!
-    obs_container = image.ImageContainerNearest(ice_conc[0,:,:].values, 
-                    obs_grid_def, radius_of_influence=20000)
-    obs_modelgrid = obs_container.resample(mod_grid_def)
-    res = obs_modelgrid.image_data
+        # Fix future warning!
+        obs_container = image.ImageContainerNearest(ice_conc[0,:,:].values, 
+                        obs_grid_def, radius_of_influence=20000)
+        obs_modelgrid = obs_container.resample(mod_grid_def)
+        res = obs_modelgrid.image_data
 
 
-    Obs1 = ds.createVariable('Obs1', 'f4', ('time','dx', 'dy',))
-    Obs1[0,:,:] = res[:]
+        Obs1 = ds.createVariable('Obs1', 'f4', ('time','dx', 'dy',))
+        Obs1[0,:,:,0] = res[:]
+        handle.close()
+    if os.path.exists(file_amsr)
+        handle = xr.open_dataset(file_osisaf)
+        ice_conc = handle['iceconc']
+        lon_obs = handle['lon']
+        lat_obs = handle['lat']
+        obs_grid_def = geometry.GridDefinition(lons=lon_obs, lats=lat_obs)
+
+
+        handle2 = xr.open_dataset(grid_file)
+        lon_mod = handle2['lon']
+        lat_mod = handle2['lat']
+        mod_grid_def = geometry.GridDefinition(lons=lon_mod, lats=lat_mod)
+
+        # Fix future warning!
+        obs_container = image.ImageContainerNearest(ice_conc[0,:,:].values, 
+                        obs_grid_def, radius_of_influence=20000)
+        obs_modelgrid = obs_container.resample(mod_grid_def)
+        res = obs_modelgrid.image_data
+
+
+        Obs1 = ds.createVariable('Obs1', 'f4', ('time','dx', 'dy',))
+        if osi:
+            Obs1[0,:,:,1] = res[:]
+        else:
+            Obs1[0,:,:,0] = res[:]
+        handle.close()
 
 
     ds.close()
