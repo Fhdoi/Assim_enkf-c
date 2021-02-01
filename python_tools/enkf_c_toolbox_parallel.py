@@ -857,11 +857,11 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
     grid_file = enkf_c_dir+'conf/new_grid_ice.nc'
 
 
-    time = ds.createDimension('Nens', None)
+    Nens = ds.createDimension('Nens', None)
     Obs1 = ds.createVariable('Obs1', 'f4', ('time','dx', 'dy','Nens',))
     
     osi = False
-    if os.path.exists(file_osisaf)
+    if os.path.exists(file_osisaf):
         osi = True
         handle = xr.open_dataset(file_osisaf)
         ice_conc = handle['ice_conc']
@@ -881,12 +881,10 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
         obs_modelgrid = obs_container.resample(mod_grid_def)
         res = obs_modelgrid.image_data
 
-
-        Obs1 = ds.createVariable('Obs1', 'f4', ('time','dx', 'dy',))
         Obs1[0,:,:,0] = res[:]
         handle.close()
-    if os.path.exists(file_amsr)
-        handle = xr.open_dataset(file_osisaf)
+    if os.path.exists(file_amsr):
+        handle = xr.open_dataset(file_amsr)
         ice_conc = handle['iceconc']
         lon_obs = handle['lon']
         lat_obs = handle['lat']
@@ -904,8 +902,6 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
         obs_modelgrid = obs_container.resample(mod_grid_def)
         res = obs_modelgrid.image_data
 
-
-        Obs1 = ds.createVariable('Obs1', 'f4', ('time','dx', 'dy',))
         if osi:
             Obs1[0,:,:,1] = res[:]
         else:
