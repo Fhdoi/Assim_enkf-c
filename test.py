@@ -87,8 +87,9 @@ if Prep:
 # See also Keguang code for download
 if Obs:
     ob.prep_osisaf_obs(date=end_date,obs_dir=obs_dir+'/Org_OSISAF/', Assim_dir=enkf_c_dir)
-    # Copy the AMSR observation from obs directory
     
+
+    # Copy the AMSR observation from obs directory
     file_amsr_inn = obs_dir+'AMSR_observations/'+'amsr2_'+end_date.strftime('%Y%m%d')+'.nc'
     file_amsr_out = enkf_c_dir+'obs/AMSR/this_day.nc'
     if os.path.exists(file_amsr_inn):

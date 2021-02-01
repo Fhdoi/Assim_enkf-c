@@ -19,10 +19,10 @@ enkf-prep: enkf_prep conf obs enkf.prm
 	./enkf_prep enkf.prm 2>&1 | tee prep.out
 
 enkf-calc: enkf_calc observations.nc conf ensemble_6565
-	nice -n +10 mpprun -np $(NP_CALC) ./enkf_calc enkf.prm 2>&1 | tee calc.out
+	nice -n +10 mpirun -np $(NP_CALC) ./enkf_calc enkf.prm 2>&1 | tee calc.out
 
 enkf-update: enkf_update X5-0.nc X5-1.nc conf ensemble_6565
-	nice -n +10 mpprun -np $(NP_UPDATE) ./enkf_update --calculate-spread --write-inflation enkf.prm 2>&1 | tee update.out
+	nice -n +10 mpirun -np $(NP_UPDATE) ./enkf_update --calculate-spread --write-inflation enkf.prm 2>&1 | tee update.out
 
 enoi-prep: enkf_prep conf obs enoi.prm
 	./enkf_prep enoi.prm 2>&1 | tee prep.out

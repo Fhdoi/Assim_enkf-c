@@ -187,6 +187,7 @@ def prep_osisaf_obs(date,obs_dir,Assim_dir):
         cmd('rm temp_osisaf1.nc temp_osisaf2.nc')
     else:
         print('Osisaf file does not exist, please download the file')
+        print(obs_file)
         try:
             os.remove(file_out)
         except:
