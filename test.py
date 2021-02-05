@@ -38,12 +38,13 @@ else:
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,1,8)
+end_date = datetime(2018,1,15)
 if computer == 'met_local':
     res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
     enkf_c_dir = "/home/sindremf/PHD2/Work/Assim_enkf-c/"
     obs_dir = '/home/sindremf/PHD2/Work/Observations/'
+    save_dir = '/home/sindremf/PHD2/Work/Test_assimiation/Assim_res/'
     Nens = 10 # This is maximum value, but not neccesarily the number used.
 elif computer == 'nebula':
     res_dir = '/nobackup/forsk/sm_sinfr/Results/barents/'

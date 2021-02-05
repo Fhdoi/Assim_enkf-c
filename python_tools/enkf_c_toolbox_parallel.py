@@ -898,7 +898,7 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
 
         # Fix future warning!
         obs_container = image.ImageContainerNearest(ice_conc[0,:,:].values, 
-                        obs_grid_def, radius_of_influence=20000)
+                        obs_grid_def, radius_of_influence=200000000000)
         obs_modelgrid = obs_container.resample(mod_grid_def)
         res = obs_modelgrid.image_data
 
@@ -907,6 +907,7 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
         else:
             Obs1[0,:,:,0] = res[:]
         handle.close()
+        handle2.close()
 
 
     ds.close()
