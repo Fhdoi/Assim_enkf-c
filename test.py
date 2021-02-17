@@ -33,12 +33,16 @@ elif mode == 'All':
     Update = True 
     Write = True
     Obs = True
+elif mode == 'Test':
+    Assimilate = True
+    Update = True
+    Write = True
 else:
     sys.exit(mode+' is not implemented yet')
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,1,15)
+end_date = datetime(2018,3,12)
 if computer == 'met_local':
     res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'

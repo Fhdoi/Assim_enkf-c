@@ -901,7 +901,8 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
                         obs_grid_def, radius_of_influence=200000000000)
         obs_modelgrid = obs_container.resample(mod_grid_def)
         res = obs_modelgrid.image_data
-
+    
+        res[res==-1] = np.nan
         if osi:
             Obs1[0,:,:,1] = res[:]
         else:
