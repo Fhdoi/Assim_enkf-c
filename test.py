@@ -106,6 +106,19 @@ if Obs:
             os.remove(file_amsr_out)
         except:
             pass
+
+    # Copy the MUR observation from obs directory
+    file_mur_inn = obs_dir+'MUR/'+'MUR_'+end_date.strftime('%Y%m%d')+'.nc'
+    file_mur_out = enkf_c_dir+'obs/MUR/this_day.nc'
+    if os.path.exists(file_mur_inn):
+        copyfile(file_mur_inn,file_mur_out)
+    else:
+        print('MUR file not availible: '+file_mur_inn)
+
+        try:
+            os.remove(file_mur_out)
+        except:
+            pass
         
     
 
