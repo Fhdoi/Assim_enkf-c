@@ -22,11 +22,14 @@ def amsr2_download(date, wdir):
     fil  = 'asi-AMSR2-n6250-{}-v5.4.nc'.format(date)
     f1   = os.path.join(wdir, 'amsr2_{}.nc'.format(date))
 
+    print(f1)
     if not os.path.exists(f1):
        try:
           print('download AMSR2 ice concentration ...')
+          print(['wget', web + fil])
           output = sp.check_call(['wget', web + fil])
           if output == 0:
+             print(['mv', fil, f1])
              sp.call(['mv', fil, f1])
              return True
           else:

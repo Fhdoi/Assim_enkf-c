@@ -1,5 +1,4 @@
-from pyproj import CRS, Proj, transform
-import pyproj
+from pyproj import Proj
 import netCDF4 as nc
 import numpy.matlib as npm
 import numpy as np
@@ -71,6 +70,9 @@ def download_amsr_Sindre(date, wdir, enkf_c_dir, add_barents = True):
     err3[np.isnan(siconc)] = -1
     siconc[np.isnan(siconc)] = -1
 
+    # Change water uncertainty to 0.05, it is way to big
+    err3[siconc == 0] = 0.05
+
     # Create a new netcdf file
 
     try:
@@ -88,28 +90,28 @@ def download_amsr_Sindre(date, wdir, enkf_c_dir, add_barents = True):
     times.calendar='gregorian'
 
 
-    dx = ds.createDimension('dx', len(X0))
-    dy = ds.createDimension('dy', len(Y0))
+    #dx = ds.createDimension('dx', len(X0))
+    #dy = ds.createDimension('dy', len(Y0))
 
 
 
-    dxs = ds.createVariable('dx', 'f4', ('dx',))
-    dys = ds.createVariable('dy', 'f4', ('dy',))
+    #dxs = ds.createVariable('dx', 'f4', ('dx',))
+    #dys = ds.createVariable('dy', 'f4', ('dy',))
 
     #print(Nens)
     #print(np.arange(0, Nens, 1.0))
-    dxs[:] = X0
-    dys[:] = Y0
+    #dxs[:] = X0
+    #dys[:] = Y0
 
-    lon = ds.createVariable('lon', 'f4', ('dy', 'dx',))
-    lat = ds.createVariable('lat', 'f4', ('dy', 'dx',))
+    #lon = ds.createVariable('lon', 'f4', ('dy', 'dx',))
+    #lat = ds.createVariable('lat', 'f4', ('dy', 'dx',))
 
-    lon[:] = lon2
-    lat[:] = lat2
-    err = ds.createVariable('error_std', 'f4', ('time', 'dy', 'dx',))
-    iceconc = ds.createVariable('iceconc', 'f4', ('time', 'dy', 'dx',))
-    iceconc[0,:,:] = siconc
-    err[0,:,:] = err3
+    #lon[:] = lon2
+    #lat[:] = lat2
+    #err = ds.createVariable('error_std', 'f4', ('time', 'dy', 'dx',))
+    #iceconc = ds.createVariable('iceconc', 'f4', ('time', 'dy', 'dx',))
+    #iceconc[0,:,:] = siconc
+    #err[0,:,:] = err3
 
     if add_barents:
         
@@ -125,8 +127,8 @@ def download_amsr_Sindre(date, wdir, enkf_c_dir, add_barents = True):
         #dxs2 = ds.createVariable('dx2', 'f4', ('dx',))
         #dys2 = ds.createVariable('dy2', 'f4', ('dy',))
         
-        lon4 = ds.createVariable('lon_bar', 'f4', ('dx2', 'dy2',))
-        lat4 = ds.createVariable('lat_bar', 'f4', ('dx2', 'dy2',))
+        lon4 = ds.createVariable('lon', 'f4', ('dx2', 'dy2',))
+        lat4 = ds.createVariable('lat', 'f4', ('dx2', 'dy2',))
 
         lon4[:] = lon_mod
         lat4[:] = lat_mod
@@ -145,11 +147,11 @@ def download_amsr_Sindre(date, wdir, enkf_c_dir, add_barents = True):
         obs_modelgrid = obs_container.resample(mod_grid_def)
         err3_bar = obs_modelgrid.image_data
         
-        bar = ds.createVariable('siconc_bar', 'f4', ('dx2', 'dy2',))
-        Err_bar = ds.createVariable('error_bar', 'f4', ('dx2', 'dy2',))
+        bar = ds.createVariable('ice_conc', 'f4', ('time','dx2', 'dy2',))
+        Err_bar = ds.createVariable('error_std', 'f4', ('time','dx2', 'dy2',))
         
-        bar[:] = siconc_bar
-        Err_bar[:] = err3_bar
+        bar[0,:,:] = siconc_bar
+        Err_bar[0,:,:] = err3_bar
         
         ds.close()
         handle2.close()
