@@ -720,7 +720,8 @@ def copy_obs(date,assim_obs_dir='./obs',obs_dir='./Observations',obs_list=['AMSR
                 cmd('mkdir '+assim_obs_dir+'/'+obs)
             shutil.copyfile(file_read[0],assim_obs_dir+'/'+obs+'/this_day.nc')
         else:
-            os.remove(assim_obs_dir+'/'+obs+'/this_day.nc')
+            if os.path.exists(assim_obs_dir+'/'+obs+'/this_day.nc'):
+                os.remove(assim_obs_dir+'/'+obs+'/this_day.nc')
 
 
 def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir, obs_list):
