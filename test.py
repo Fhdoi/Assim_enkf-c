@@ -42,7 +42,9 @@ else:
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,3,12)
+end_date = datetime(2018,4,2)
+obs_list = ['AMSR','SSMIS','SMOS','MUR']
+
 if computer == 'met_local':
     res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
@@ -91,34 +93,7 @@ if Prep:
 # copy and prep observations
 # See also Keguang code for download
 if Obs:
-    ob.prep_osisaf_obs(date=end_date,obs_dir=obs_dir+'/Org_OSISAF/', Assim_dir=enkf_c_dir)
-    
-
-    # Copy the AMSR observation from obs directory
-    file_amsr_inn = obs_dir+'AMSR_observations/'+'amsr2_'+end_date.strftime('%Y%m%d')+'.nc'
-    file_amsr_out = enkf_c_dir+'obs/AMSR/this_day.nc'
-    if os.path.exists(file_amsr_inn):
-        copyfile(file_amsr_inn,file_amsr_out)
-    else:
-        print('AMSR file not availible: '+file_amsr_inn)
-        
-        try:
-            os.remove(file_amsr_out)
-        except:
-            pass
-
-    # Copy the MUR observation from obs directory
-    file_mur_inn = obs_dir+'MUR/'+'MUR_'+end_date.strftime('%Y%m%d')+'.nc'
-    file_mur_out = enkf_c_dir+'obs/MUR/this_day.nc'
-    if os.path.exists(file_mur_inn):
-        copyfile(file_mur_inn,file_mur_out)
-    else:
-        print('MUR file not availible: '+file_mur_inn)
-
-        try:
-            os.remove(file_mur_out)
-        except:
-            pass
+    et.copy_obs(date=end_date,assim_obs_dir=enkf_c_dir+'/obs/',obs_dir=obs_dir,obs_list=obs_list)
         
     
 
@@ -139,4 +114,4 @@ if Write:
     Lines = file_ens.readlines()
     ens_count = len(Lines)
     ###############################
-    et.write_results(date=end_date,enkf_c_dir=enkf_c_dir,ens_out_dir=res_dir, Nens=ens_count, save_dir=save_dir)
+    et.write_results(date=end_date,enkf_c_dir=enkf_c_dir,ens_out_dir=res_dir, Nens=ens_count, save_dir=save_dir, obs_list=obs_list)

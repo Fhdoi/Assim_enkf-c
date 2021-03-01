@@ -19,6 +19,7 @@ from pyresample.geometry import GridDefinition
 from pyresample import geometry, image, SwathDefinition
 import multiprocessing
 from joblib import Parallel, delayed
+import shutil
 
 
 def count_ens(date,enkf_c_dir, res_dir):
@@ -700,8 +701,29 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                 mem_ds.close()
         org_ds.close()
 
+def copy_obs(date,assim_obs_dir='./obs',obs_dir='./Observations',obs_list=['AMSR']):
 
-def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
+    # Remove all old observation files
+    for obs in os.listdir(assim_obs_dir):
+        file = assim_obs_dir + '/' + obs + '/this_day.nc'
+        if os.path.exists(file):
+            os.remove(file)
+
+    # Copy in the new observations
+    for obs in obs_list:
+        file = obs_dir + '/' + obs + '/' + '*' + date.strftime('%Y%m%d') + '*.nc'
+        file_read = glob.glob(file)
+        if file_read:
+            # Check if obs folder exists, if not create it
+            if not os.path.exists(assim_obs_dir + '/' + obs):
+                print('mkdir '+assim_obs_dir+'/'+obs)
+                cmd('mkdir '+assim_obs_dir+'/'+obs)
+            shutil.copyfile(file_read[0],assim_obs_dir+'/'+obs+'/this_day.nc')
+        else:
+            os.remove(assim_obs_dir+'/'+obs+'/this_day.nc')
+
+
+def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir, obs_list):
     
     smnd = str(date.month) if date.month > 9 else '0'+str(date.month)
     sday = str(date.day) if date.day > 9 else '0'+str(date.day)
@@ -860,55 +882,34 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir):
     Nens = ds.createDimension('Nens', None)
     Obs1 = ds.createVariable('Obs1', 'f4', ('time','dx', 'dy','Nens',))
     
-    osi = False
-    if os.path.exists(file_osisaf):
-        osi = True
-        handle = xr.open_dataset(file_osisaf)
-        ice_conc = handle['ice_conc']
-        lon_obs = handle['lon']
-        lat_obs = handle['lat']
-        obs_grid_def = geometry.GridDefinition(lons=lon_obs, lats=lat_obs)
+    handle2 = xr.open_dataset(grid_file)
+    lon_mod = handle2['lon']
+    lat_mod = handle2['lat']
+    mod_grid_def = geometry.GridDefinition(lons=lon_mod, lats=lat_mod)
 
+    i = -1
+    for obs in obs_list:
+        fileobs = enkf_c_dir+'/obs/'+obs+'/this_day.nc'
+        if os.path.exists(fileobs):
+            i += 1
+            if obs == 'AMSR' or obs == 'SSMIS':
+                varname = 'ice_conc'
+            elif obs == 'SMOS' or obs == 'CRYO':
+                varname = 'sit'
+            elif obs == 'MUR':
+                varname = 'sst'
+            handle = xr.open_dataset(fileobs)
+            ice_conc = handle[varname]
+            lon_obs = handle['lon']
+            lat_obs = handle['lat']
+            obs_grid_def = geometry.GridDefinition(lons=lon_obs, lats=lat_obs)
 
-        handle2 = xr.open_dataset(grid_file)
-        lon_mod = handle2['lon']
-        lat_mod = handle2['lat']
-        mod_grid_def = geometry.GridDefinition(lons=lon_mod, lats=lat_mod)
+            # Fix future warning!
+            obs_container = image.ImageContainerNearest(ice_conc[0,:,:].values, 
+                            obs_grid_def, radius_of_influence=20000)
+            obs_modelgrid = obs_container.resample(mod_grid_def)
+            res = obs_modelgrid.image_data
 
-        # Fix future warning!
-        obs_container = image.ImageContainerNearest(ice_conc[0,:,:].values, 
-                        obs_grid_def, radius_of_influence=20000)
-        obs_modelgrid = obs_container.resample(mod_grid_def)
-        res = obs_modelgrid.image_data
-
-        Obs1[0,:,:,0] = res[:]
-        handle.close()
-    if os.path.exists(file_amsr):
-        handle = xr.open_dataset(file_amsr)
-        ice_conc = handle['iceconc']
-        lon_obs = handle['lon']
-        lat_obs = handle['lat']
-        obs_grid_def = geometry.GridDefinition(lons=lon_obs, lats=lat_obs)
-
-
-        handle2 = xr.open_dataset(grid_file)
-        lon_mod = handle2['lon']
-        lat_mod = handle2['lat']
-        mod_grid_def = geometry.GridDefinition(lons=lon_mod, lats=lat_mod)
-
-        # Fix future warning!
-        obs_container = image.ImageContainerNearest(ice_conc[0,:,:].values, 
-                        obs_grid_def, radius_of_influence=200000000000)
-        obs_modelgrid = obs_container.resample(mod_grid_def)
-        res = obs_modelgrid.image_data
-    
-        res[res==-1] = np.nan
-        if osi:
-            Obs1[0,:,:,1] = res[:]
-        else:
-            Obs1[0,:,:,0] = res[:]
-        handle.close()
-        handle2.close()
-
+            Obs1[0,:,:,i] = res[:]
 
     ds.close()
