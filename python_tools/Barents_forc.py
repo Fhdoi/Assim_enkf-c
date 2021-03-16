@@ -385,10 +385,11 @@ def generate_bry(clmfile='barents_clm.nc', bryfile='barents_bry.nc',roms_nlevs=4
                     temp_west[:] = clm_var[:,:,:,0]
                     temp_east[:] = clm_var[:,:,:,-1]
             
-            temp_north.time = 'bry_time'
-            temp_south.time = 'bry_time'
-            temp_west.time = 'bry_time'
-            temp_east.time = 'bry_time'
+            if len(clm_var.shape) > 2:
+                temp_north.time = 'bry_time'
+                temp_south.time = 'bry_time'
+                temp_west.time = 'bry_time'
+                temp_east.time = 'bry_time'
 
         
     cl.close()
