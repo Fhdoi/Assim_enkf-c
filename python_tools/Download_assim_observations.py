@@ -249,6 +249,7 @@ def download_SMOS(date,obs_dir,custom_grid_file=None, keep_both=True):
         cmd('ncrename -O -v sea_ice_thickness,sit '+smos_out+' '+smos_out)
         cmd('ncrename -O -v longitude,lon '+smos_out+' '+smos_out)
         cmd('ncrename -O -v latitude,lat '+smos_out+' '+smos_out)
+        cmd('ncap2 -O -s "where(error_std == 0) error_std = 0.01" '+smos_out+' '+smos_out)
         
         if custom_grid_file:
             ds = xr.open_dataset(smos_out)
