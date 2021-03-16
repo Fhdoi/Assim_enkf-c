@@ -1,7 +1,7 @@
 PRODUCT = ALL
-TYPE = SIC_OSI
+TYPE = SIC_SSMIS
 READER = xy_gridded
-FILE = obs/OSISAF/this_day.nc
+FILE = obs/SSMIS/this_day.nc
 PARAMETER VARNAME = ice_conc
 ERROR_STD = 1 MU
 
@@ -17,5 +17,20 @@ TYPE = MUR
 READER = xy_gridded
 FILE = obs/MUR/this_day.nc
 PARAMETER VARNAME = sst
+ERROR_STD = 1 MU
+
+PRODUCT = ALL
+TYPE = SIT_SMOS
+READER = xy_gridded
+FILE = obs/SMOS/this_day.nc
+PARAMETER VARNAME = sit
+ERROR_STD = 1 MU
+
+PRODUCT = ALL
+TYPE = SIT_CRYO
+READER = xy_gridded
+FILE = obs/MUR/ikke_bruk.nc
+PARAMETER VARNAME = sit
 ERROR_STD = 0.5
+
 

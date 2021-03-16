@@ -42,7 +42,7 @@ else:
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,4,2)
+end_date = datetime(2018,4,16)
 obs_list = ['AMSR','SSMIS','SMOS','MUR']
 
 if computer == 'met_local':
