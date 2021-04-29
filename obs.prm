@@ -20,6 +20,27 @@ PARAMETER VARNAME = sst
 ERROR_STD = 1 MU
 
 PRODUCT = ALL
+TYPE = MUR
+READER = xy_gridded
+FILE = obs/MUR/this_day1.nc
+PARAMETER VARNAME = sst1
+ERROR_STD = 1 MU
+
+PRODUCT = ALL
+TYPE = MUR
+READER = xy_gridded
+FILE = obs/MUR/this_day2.nc
+PARAMETER VARNAME = sst2
+ERROR_STD = 1 MU
+
+PRODUCT = ALL
+TYPE = MUR
+READER = xy_gridded
+FILE = obs/MUR/this_day3.nc
+PARAMETER VARNAME = sst3
+ERROR_STD = 1 MU
+
+PRODUCT = ALL
 TYPE = SIT_SMOS
 READER = xy_gridded
 FILE = obs/SMOS/this_day.nc

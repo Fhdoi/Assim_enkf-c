@@ -26,8 +26,10 @@ def count_ens(date,enkf_c_dir, res_dir):
     smnd = str(date.month) if date.month > 9 else '0'+str(date.month)
     sday = str(date.day) if date.day > 9 else '0'+str(date.day)
     file_ens = open(enkf_c_dir+'files_in_ensemble', "w")
-    files = glob.glob(res_dir+'iced.'+str(date.year)+smnd+sday+'*')
+    #print(res_dir+'ice_res/'+'iced.'+str(date.year)+smnd+sday+'*')
+    files = glob.glob(res_dir+'ice_res/'+'iced.'+str(date.year)+smnd+sday+'*')
     files.sort()
+    #print(files)
     for file in files:
         sens = file[-6:-3]
         file_ens.writelines(sens+'\n')
@@ -53,7 +55,7 @@ def cmd(command):
         return result
 
 # Rewrite the model output to files recognized by the enkf-c
-def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_var,Nens):
+def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_var, his_var,backlog,Nens):
     
     # This should return the number of ensembles found!!!!
 
@@ -79,6 +81,8 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
     
     num_cores = multiprocessing.cpu_count()
     Parallel(n_jobs=num_cores)(delayed(write_to_mem)(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_var,latshape) for iens in range(1,Nens+1))
+    if backlog > 0:
+        Parallel(n_jobs=num_cores)(delayed(write_hismem)(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, his_var,latshape,backlog) for iens in range(1,Nens+1))
     #Parallel(n_jobs=num_cores)(delayed(my_function)(iens) for iens in range(1,Nens+1))     
     
     #file_ens.close()
@@ -89,6 +93,91 @@ def my_function(num):
     #return ens_count
 def write_to_mem2(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_var,latshape):
     pass
+
+def write_hismem(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, his_var,latshape,backlog=3):
+    
+    # backlog is the number of days back in time that are to be included in the assimilaton
+    
+    
+    ice_halo_cells = False
+    prescripts = ['icehis.','oceanhis.']
+    
+    syear = str(ens_date.year)
+    smnd = str(ens_date.month)
+    smnd = smnd.zfill(2)
+    sday = str(ens_date.day)
+    sday = sday.zfill(2)
+    
+    s1ens = str(iens)
+    s1ens = s1ens.zfill(3)
+
+    for pre in prescripts:
+        
+        for b in range(0,backlog):
+            
+            file = ens_inn_dir+'history/'+pre+syear+smnd+sday+'_'+s1ens+'.nc'
+            print(file)
+            #make sure that the history files exist
+            if os.path.exists(file):
+                ds2 = xr.open_dataset(file)
+                for var in ds2.variables:
+                    #print(var)
+
+                    if var in his_var:
+
+                        fn = enkf_c_dir+'ensemble_6565/mem'+s1ens+'_'+var+str(b+1)+'.nc'
+                        
+
+                        var_inn = ds2[var].data
+                        
+                        # only do sst for temp for now to save space
+                        if var not in ['temp']:
+                            var2 = var + str(b+1)
+                            
+                            # Check that backlog exists 
+                            if b < var_inn.shape[0] -1:
+                         
+                                if len(var_inn.shape) == 4:
+                                    temp = var_inn[-2-b:-1-b,:,:,:]
+                                    temp[np.isnan(temp)] = 0
+                                    ds = xr.Dataset(
+                                        {var2: (('time','x', 'y','z'), var_inn[-2-b:-1-b,:,:,:])},
+                                        coords={
+                                            'time': [ens_date],
+                                        },
+                                    )
+                                    ds.to_netcdf(fn)
+
+                                # Kan droppe masse kode ved å bruke xarray isteden!!!!!!!!!!!!
+                                
+                                elif len(var_inn.shape) == 3:
+                                    temp = var_inn[-2-b:-1-b,:,:]
+                                    temp[np.isnan(temp)] = 0
+                                    ds = xr.Dataset(
+                                        {var2: (('time','x', 'y'), temp)},
+                                        coords={
+                                            'time': [ens_date],
+                                        },
+                                    )
+                                    ds.to_netcdf(fn)
+                                
+                        # also make SST
+                        if var == 'temp':
+                            fn = enkf_c_dir+'ensemble_6565/mem'+s1ens+'_'+'sst'+str(b+1)+'.nc'
+                            temp = var_inn[-2-b:-1-b,-1,:,:]
+                            temp[np.isnan(temp)] = 0
+                            ds = xr.Dataset(
+                                {'sst'+str(b+1): (('time','x', 'y'), temp)},
+                                coords={
+                                    'time': [ens_date],
+                                },
+                            )
+                            ds.to_netcdf(fn)
+                ds2.close()
+
+                        
+                            
+                            
 
 def write_to_mem(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_var,latshape):#,file_ens):
     ice_halo_cells = False
@@ -154,6 +243,7 @@ def write_to_mem(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnK
                     # teste om det har noe å si på assimilasjonen
                     time = ds.createDimension('time', None)
 
+                    # Kan droppe masse kode ved å bruke xarray isteden!!!!!!!!!!!!
                     if len(var_inn.shape) == 4:
         
                         dx = ds.createDimension('dx', var_inn.shape[2])
@@ -516,6 +606,7 @@ def update_tuning(tuning_file, update_srf, update_dfs):
                 elif update_dfs[obs_num] == -1 and l[0:6] == 'LOCRAD':
                     lr_old = float(l[9:-1])
                     Lines[ii] = 'RFACTOR = '+str(round(lr_old*0.75))+'\n'
+    file1.close()
 
 def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
     # Update the ensemble, in practise the whole ensemble does not need to be updated, only those that require 
@@ -701,27 +792,34 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                 mem_ds.close()
         org_ds.close()
 
-def copy_obs(date,assim_obs_dir='./obs',obs_dir='./Observations',obs_list=['AMSR']):
+def copy_obs(date,assim_obs_dir='./obs',obs_dir='./Observations',obs_list=['AMSR'],backlog=3):
 
     # Remove all old observation files
     for obs in os.listdir(assim_obs_dir):
-        file = assim_obs_dir + '/' + obs + '/this_day.nc'
-        if os.path.exists(file):
-            os.remove(file)
+        for b in range(0,backlog+1):
+            file = assim_obs_dir + '/' + obs + '/this_day'+str(b)+'.nc'
+            if os.path.exists(file):
+                os.remove(file)
 
     # Copy in the new observations
     for obs in obs_list:
-        file = obs_dir + '/' + obs + '/' + '*' + date.strftime('%Y%m%d') + '*.nc'
-        file_read = glob.glob(file)
-        if file_read:
-            # Check if obs folder exists, if not create it
-            if not os.path.exists(assim_obs_dir + '/' + obs):
-                print('mkdir '+assim_obs_dir+'/'+obs)
-                cmd('mkdir '+assim_obs_dir+'/'+obs)
-            shutil.copyfile(file_read[0],assim_obs_dir+'/'+obs+'/this_day.nc')
-        else:
-            if os.path.exists(assim_obs_dir+'/'+obs+'/this_day.nc'):
-                os.remove(assim_obs_dir+'/'+obs+'/this_day.nc')
+        for b in range(0,backlog+1):
+            date2 = date - datetime.timedelta(days=b)
+        
+            file = obs_dir + '/' + obs + '/' + '*' + date2.strftime('%Y%m%d') + '*.nc'
+            file_read = glob.glob(file)
+            if file_read:
+                # Check if obs folder exists, if not create it
+                if not os.path.exists(assim_obs_dir + '/' + obs):
+                    print('mkdir '+assim_obs_dir+'/'+obs)
+                    cmd('mkdir '+assim_obs_dir+'/'+obs)
+                shutil.copyfile(file_read[0],assim_obs_dir+'/'+obs+'/this_day'+str(b)+'.nc')
+        
+        
+        # Dette gjøre vel allerede over!
+        #else:
+        #    if os.path.exists(assim_obs_dir+'/'+obs+'/this_day.nc'):
+        #        os.remove(assim_obs_dir+'/'+obs+'/this_day.nc')
 
 
 def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir, obs_list):

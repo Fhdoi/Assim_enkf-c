@@ -42,11 +42,15 @@ else:
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,4,16)
+end_date = datetime(2018,2,5)
 obs_list = ['AMSR','SSMIS','SMOS','MUR']
 
 if computer == 'met_local':
-    res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
+    res_dir = '/home/sindre/PHD2/Work/Assim_backintime/Res/'
+    #ocn_res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
+    #ocn_his_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
+    #ice_res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
+    #ice_his_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
     enkf_c_dir = "/home/sindremf/PHD2/Work/Assim_enkf-c/"
     obs_dir = '/home/sindremf/PHD2/Work/Observations/'
@@ -73,6 +77,8 @@ res_type = 'ice'
 EnKF_var = ['aicen','vicen','temp','salt','qice001','qice002','qice003','qice004',
             'qice005','qice006','qice007','qsno001','sice001','sice002','sice003','sice004',
             'sice005','sice006','sice007','vsnon', 'Tsfcn']
+his_var = ['temp', 'aice_d']      
+      
 
 # Write which and how many ensemble members that are ready
 
@@ -80,6 +86,7 @@ EnKF_var = ['aicen','vicen','temp','salt','qice001','qice002','qice003','qice004
 # finishing during assimilation
 if ens_count:
     ens_count = et.count_ens(date=end_date,enkf_c_dir=enkf_c_dir,res_dir=res_dir)
+    print(ens_count)
 
 # Prep the ensemble
 if Prep:
@@ -87,7 +94,7 @@ if Prep:
     et.Prep_ensemble(ens_date = end_date, grid_dir=grid_dir, 
                      ens_inn_dir=res_dir, enkf_c_dir =enkf_c_dir, 
                      res_type = 'ice', EnKF_var=EnKF_var,
-                     Nens = Nens)
+                     his_var=his_var,backlog=3,Nens = Nens)
     ens_count = et.count_ens(date=end_date,enkf_c_dir=enkf_c_dir,res_dir=res_dir)
 
 # copy and prep observations

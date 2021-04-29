@@ -51,6 +51,12 @@ VAR = salt
 GRID = ocn-grid
 VAR = sst
 GRID = ocn-grid
+VAR = sst1
+GRID = ocn-grid
+VAR = sst2
+GRID = ocn-grid
+VAR = sst3
+GRID = ocn-grid
 VAR = sss
 GRID = ocn-grid
 
