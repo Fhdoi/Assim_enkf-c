@@ -69,7 +69,9 @@ def Prep_ensemble(ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnKF_va
     # Disse leses fra grid fila!    
     lat_rho = file_cord_handle['lat_rho']
     latshape = lat_rho.shape
+    
     file_cord_handle.close()
+    
     #lon_rho = file_cord_handle.variables['lon_rho']
 
     # Write the files that are used to disk
@@ -568,6 +570,13 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
     for pre in prescripts:
         file = ens_out_dir+pre+syear+smnd+sday+'_'+ll[0:-1]+'.nc'        
         print(file)
+        print('writing_res')
+        
+        # This should not be neccessary, but I am missing a close somewhere, but I dont know where.
+        # Må bruke xarray, også open orginalt med xarray!!
+        org_ds = xr.open_dataset(file) 
+        org_ds.close()
+        
         org_ds = nc.Dataset(file, 'r+', format='NETCDF4')    
         num = str(file_count)
         halo_cells = False
@@ -580,11 +589,11 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                     fn = enkf_c_dir+'ensemble_6565/mem0'+num+'_'+var+'.nc'
                 else:
                     fn = enkf_c_dir+'ensemble_6565/mem0'+num+'_'+var+'.nc.analysis'
-                mem_ds = nc.Dataset(fn, 'r', format='NETCDF4')
+                mem_ds = xr.open_dataset(fn, 'r', format='NETCDF4')
                 #print(fn)
                 #print(file)
-                new_var = mem_ds.variables[var]
-                old_var = org_ds.variables[var]
+                new_var = mem_ds[var]
+                old_var = org_ds[var]
 
                 # Check bounds for this file, but what should the bounds be? 
                 # With the dfs and srf checks it is not expected that the updates are too large, but could probalby

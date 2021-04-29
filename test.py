@@ -42,11 +42,11 @@ else:
 
 computer = input("Type in computer in use[met_local(default),nebula,fram]: ") or "met_local" 
 print(computer)
-end_date = datetime(2018,4,16)
+end_date = datetime(2018,2,5)
 obs_list = ['AMSR','SSMIS','SMOS','MUR']
 
 if computer == 'met_local':
-    res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
+    res_dir = "/home/sindre/PHD2/Work/Assim_backintime/Res/"
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
     enkf_c_dir = "/home/sindremf/PHD2/Work/Assim_enkf-c/"
     obs_dir = '/home/sindremf/PHD2/Work/Observations/'
