@@ -113,7 +113,7 @@ def write_to_mem(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnK
         #This accounts for the possibilty that some ensemble members have not finished in time
         if os.path.exists(file):
             
-           
+                       
             file_handle = xr.open_dataset(file)
             if pre == 'ocean.':
                 # Write the file name to the member files folder
@@ -428,7 +428,7 @@ def write_to_mem(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnK
 
                         
                        # if var equals aicen or vicen
-                    
+                                
             file_handle.close()  
     
 def set_number_ensembles(prm_file, ens_count):
@@ -589,7 +589,7 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                     fn = enkf_c_dir+'ensemble_6565/mem0'+num+'_'+var+'.nc'
                 else:
                     fn = enkf_c_dir+'ensemble_6565/mem0'+num+'_'+var+'.nc.analysis'
-                mem_ds = xr.open_dataset(fn, 'r', format='NETCDF4')
+                mem_ds = xr.open_dataset(fn)
                 #print(fn)
                 #print(file)
                 new_var = mem_ds[var]
