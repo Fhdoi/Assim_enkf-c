@@ -518,6 +518,7 @@ def update_tuning(tuning_file, update_srf, update_dfs):
                 elif update_dfs[obs_num] == -1 and l[0:6] == 'LOCRAD':
                     lr_old = float(l[9:-1])
                     Lines[ii] = 'RFACTOR = '+str(round(lr_old*0.75))+'\n'
+    file1.close()
 
 def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
     # Update the ensemble, in practise the whole ensemble does not need to be updated, only those that require 
@@ -606,7 +607,7 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
 
                 if old_var.shape[2]>new_var.shape[3] and pre == 'iced.':
                     halo_cells = True
-                temp = new_var[:]
+                temp = new_var[:].data
 
                 if halo_cells:
                     if len(temp.shape) == 3:
