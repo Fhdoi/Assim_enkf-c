@@ -20,6 +20,7 @@ from pyresample import geometry, image, SwathDefinition
 import multiprocessing
 from joblib import Parallel, delayed
 import shutil
+from os.path import exists
 
 
 def count_ens(date,enkf_c_dir, res_dir):
@@ -36,6 +37,27 @@ def count_ens(date,enkf_c_dir, res_dir):
     file_ens.close()
 
     return len(files)
+
+def count_ens2(date,enkf_c_dir, res_dir):
+    count = 0
+    file_ens = open(enkf_c_dir+'files_in_ensemble', "w")
+
+    a = glob.glob(res_dir+'/restart/*')
+    a.sort()
+    #print(a)
+    #print(res_dir)
+    for di in a:
+        print(di)
+        res_ice = 'iced.'+str(date.year)+str(date.month).zfill(2)+str(date.day).zfill(2)+'_'+di[-3:]+'.nc'
+        print(res_ice)
+        full_file = di + '/' + res_ice
+        if exists(full_file):
+            count = count + 1
+            sens = full_file[-6:-3]
+            file_ens.writelines(sens+'\n')
+    file_ens.close()
+
+    return count
 
 
 def cmd(command):
@@ -115,7 +137,7 @@ def write_hismem(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, his
         
         for b in range(0,backlog):
             
-            file = ens_inn_dir+'history/'+pre+syear+smnd+sday+'_'+s1ens+'.nc'
+            file = ens_inn_dir+'history/Ens'+s1ens+'/'+pre+syear+smnd+sday+'_'+s1ens+'.nc'
             print(file)
             #make sure that the history files exist
             if os.path.exists(file):
@@ -183,19 +205,12 @@ def write_to_mem(iens,ens_date, grid_dir, ens_inn_dir, enkf_c_dir, res_type, EnK
     ice_halo_cells = False
     prescripts = ['iced.','ocean.']
     syear = str(ens_date.year)
-    smnd = str(ens_date.month)
-    if ens_date.month < 10:
-        smnd = '0' + smnd
-    sday = str(ens_date.day)
-    if ens_date.day < 10:
-        sday = '0' + sday
+    smnd = str(ens_date.month).zfill(2)
+    sday = str(ens_date.day).zfill(2)
+
     for pre in prescripts:
-        s1ens = str(iens)
-        if iens < 100:
-            s1ens = '0'+s1ens
-        if iens < 10:
-            s1ens = '0'+s1ens
-        file = ens_inn_dir+pre+syear+smnd+sday+'_'+s1ens+'.nc'
+        s1ens = str(iens).zfill(3)
+        file = ens_inn_dir+'restart/Ens'+s1ens+'/'+pre+syear+smnd+sday+'_'+s1ens+'.nc'
         print(file)
         #This accounts for the possibilty that some ensemble members have not finished in time
         if os.path.exists(file):
@@ -631,7 +646,7 @@ def update_the_ensemble(enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
     num_cores = multiprocessing.cpu_count()
 
     Parallel(n_jobs=num_cores)(delayed(write_res)(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date) for ll in Lines)
-
+    #write_res(Lines[0],enkf_c_dir, EnKF_var,ens_out_dir,ens_date)
 
     file_ens.close()                 
 
@@ -655,10 +670,12 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
     #            'qice004','qice005','qice006','qice007','sice001','sice002','sice003', 
     #            'sice004','sice005','sice006','sice007','Tsfcn']
     not_update = ['']
-    file_count = int(ll) # This assumes that all ensembles are availible, fix later
+    file_count = count_ens2(ens_date,enkf_c_dir, ens_out_dir)
     for pre in prescripts:
-        file = ens_out_dir+pre+syear+smnd+sday+'_'+ll[0:-1]+'.nc'        
-        print(file)
+        file = ens_out_dir+'restart/Ens'+ll.strip()+'/'+pre+syear+smnd+sday+'_'+ll.strip()+'.nc'
+        #print('her') 
+        print(file)       
+        #print('der')
         org_ds = nc.Dataset(file, 'r+', format='NETCDF4')    
         num = str(file_count)
         halo_cells = False
@@ -667,6 +684,7 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
         
         for var in org_ds.variables.keys():
             if var in EnKF_var:
+                #print(var)
                 if var in not_update:
                     fn = enkf_c_dir+'ensemble_6565/mem0'+num+'_'+var+'.nc'
                 else:
@@ -788,7 +806,8 @@ def write_res(ll,enkf_c_dir, EnKF_var,ens_out_dir,ens_date):
                 elif pre == 'ocean.':
                     old_var[:] = temp
 
-                
+                #print(var)
+                #print('ferdig')
                 mem_ds.close()
         org_ds.close()
 
@@ -898,43 +917,43 @@ def write_results(date,enkf_c_dir,ens_out_dir,Nens, save_dir, obs_list):
 
     for ll in Lines:
         file_count += 1
-        sens = str(file_count) if file_count > 9 else '0'+str(file_count)
-        file_out_ice = ens_out_dir+'iced.'+str(date.year)+smnd+sday+'_'+ll[0:-1]+'.nc' 
-        file_out_ocn = ens_out_dir+'ocean.'+str(date.year)+smnd+sday+'_'+ll[0:-1]+'.nc'
+        sens = str(file_count).zfill(3)
+        file_out_ice = ens_out_dir+'/restart/Ens'+ll.strip()+'/iced.'+str(date.year)+smnd+sday+'_'+ll.strip()+'.nc' 
+        file_out_ocn = ens_out_dir+'/restart/Ens'+ll.strip()+'/ocean.'+str(date.year)+smnd+sday+'_'+ll.strip()+'.nc'
 
         ############ Write the inn first ###################
         # Write aice_inn to res        
-        file_inn = enkf_c_dir+'ensemble_6565/mem0'+sens+'_aice.nc'
+        file_inn = enkf_c_dir+'ensemble_6565/mem'+sens+'_aice.nc'
         handle = xr.open_dataset(file_inn)
         aice_before[0,int(ll[0:-1])-1,:,:] = handle['aice'][0,:,:]
         handle.close()
 
         # Write vice_inn to res        
-        file_inn = enkf_c_dir+'ensemble_6565/mem0'+sens+'_vice.nc'
+        file_inn = enkf_c_dir+'ensemble_6565/mem'+sens+'_vice.nc'
         handle = xr.open_dataset(file_inn)
         vice_before[0,int(ll[0:-1])-1,:,:] = handle['vice'][0,:,:]
         handle.close()
 
         # Write sst_inn to res        
-        file_inn = enkf_c_dir+'ensemble_6565/mem0'+sens+'_sst.nc'
+        file_inn = enkf_c_dir+'ensemble_6565/mem'+sens+'_sst.nc'
         handle = xr.open_dataset(file_inn)
         sst_before[0,int(ll[0:-1])-1,:,:] = handle['sst'][0,:,:]
         handle.close()
         
         # Write the full member 1 states
         if file_count == 1:
-            file_inn = enkf_c_dir+'ensemble_6565/mem0'+sens+'_aicen.nc'
+            file_inn = enkf_c_dir+'ensemble_6565/mem'+sens+'_aicen.nc'
             handle = xr.open_dataset(file_inn)
             aicen_mem1_before[0,:,:,:] = handle['aicen'][0,:,:,:]
             nx_size = handle['aicen'].shape[2]
             handle.close()
 
-            file_inn = enkf_c_dir+'ensemble_6565/mem0'+sens+'_vicen.nc'
+            file_inn = enkf_c_dir+'ensemble_6565/mem'+sens+'_vicen.nc'
             handle = xr.open_dataset(file_inn)
             vicen_mem1_before[0,:,:,:] = handle['vicen'][0,:,:,:]
             handle.close()
         
-            file_inn = enkf_c_dir+'ensemble_6565/mem0'+sens+'_temp.nc'
+            file_inn = enkf_c_dir+'ensemble_6565/mem'+sens+'_temp.nc'
             handle = xr.open_dataset(file_inn)
             temp_mem1_before[0,:,:,:] = handle['temp'][0,:,:,:]
             handle.close()

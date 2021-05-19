@@ -8,6 +8,7 @@ from numpy.matlib import repmat
 import matplotlib.pyplot as plt
 from pyproj import Proj
 import subprocess
+from skimage.transform import rescale, resize
 
 
 def download_observations(date_list=None,obstype_list=None,obs_dir='./',custom_file=None,keep_both=False):
@@ -155,6 +156,10 @@ def download_AMSR(date,obs_dir,custom_grid_file=None, keep_both=True):
         # Change water uncertainty to 0.05, it is way to big
         err3[siconc == 0] = 0.05   
         
+        # Make sure that not errors are 0 as this will crash the assimilation
+        err3[err3 == 0] = 10
+        
+        
         # save the file
         amsr_file2 = amsr_dir+'AMSR2_'+date.strftime('%Y%m%d')+'.nc'
         ds = xr.Dataset(
@@ -205,14 +210,20 @@ def download_CRYO(date,obs_dir,custom_grid_file=None, keep_both=True):
         cmd('ncap2 -O -s "where(lon > 180.0) lon = lon-360.0" '+cryo_out+' '+cryo_out)
         cmd('ncap2 -O -s "where(sit < 0.0) sit = -1" '+cryo_out+' '+cryo_out)
         
-        
+       
         
         if custom_grid_file:
             ds = xr.open_dataset(cryo_out)
             cryo_out2 = cryo_dir+'CRYO_'+date.strftime('%Y%m%d')+'b.nc'
+            
+            err = np.expand_dims(0.1*ds['sit'].data[:],axis=0)
+            # Make sure that no error is zero
+            err[err == 0] = 10
+        
+        
             ds2 = xr.Dataset(
                 {"sit": (('time','x', 'y'), np.expand_dims(ds['sit'].data[:],axis=0)),
-                "error_std": (('time','x', 'y'), np.expand_dims(0.1*ds['sit'].data[:],axis=0)),
+                "error_std": (('time','x', 'y'), err),
                 "lon": (('x', 'y'), ds['lon'].data[:]),
                 "lat": (('x', 'y'), ds['lat'].data[:])},
                 coords={
@@ -255,14 +266,18 @@ def download_SMOS(date,obs_dir,custom_grid_file=None, keep_both=True):
             ds = xr.open_dataset(smos_out)
             smos_out2 = smos_dir+'SMOS_'+date.strftime('%Y%m%d')+'b.nc'
             
+
             tt = ds['sit'].data[:]
             et = ds['error_std'].data[:]
             
             et[np.isnan(tt)] = 10
             tt[np.isnan(tt)] = -1
+            
+            et[et == 0] = 10
+            
             ds2 = xr.Dataset(
-                {"sit": (('time','x', 'y'), ds['sit'].data[:]),
-                "error_std": (('time','x', 'y'), ds['error_std'].data[:]),
+                {"sit": (('time','x', 'y'), tt),
+                "error_std": (('time','x', 'y'), et),
                 "lon": (('x', 'y'), ds['lon'].data[:]),
                 "lat": (('x', 'y'), ds['lat'].data[:])},
                 coords={
@@ -275,6 +290,7 @@ def download_SMOS(date,obs_dir,custom_grid_file=None, keep_both=True):
             if keep_both:
                 pass
             else:
+                print(smos_out2)
                 cmd('rm '+smos_out)
 
 
@@ -291,23 +307,33 @@ def download_MUR(date,obs_dir,custom_grid_file=None):
     dl = [date]
     mur_file = mur_dir + date.strftime('%Y%m%d')+mur_postxt
     res = cmd('wget -P '+mur_dir+' '+cryo_usr+' '+mur_pretxt+date.strftime('%Y')+'/'+date.strftime('%j')+'/'+date.strftime('%Y%m%d')+mur_postxt)
-
+    #res = 0
     # If file exists
     if res == 0:
-        cmd('ncks -O -d lat,13000,17998 '+mur_file+' '+mur_file)
-        cmd('ncks -O -v analysed_sst,analysis_error '+mur_file+' '+mur_file)
+        #cmd('ncks -O -d lat,13000,17998 '+mur_file+' '+mur_file)
+        #cmd('ncks -O -v analysed_sst,analysis_error '+mur_file+' '+mur_file)
         # Just make a new file as I need to convert the grid and also make new lon/lat files.
         DS = xr.open_dataset(mur_file)
         murlon = DS['lon']
         murlat = DS['lat']
+    
+        #print('hit')
+        murlat2 = np.transpose(repmat(murlat[:].data,len(murlon),1))
+        murlon2 = repmat(murlon[:].data,len(murlat),1)
 
-        murlat2 = np.transpose(repmat(murlat.data,len(murlon),1))
-        murlon2 = repmat(murlon.data,len(murlat),1)
-
-        mur_grid_def = geometry.GridDefinition(lons=murlon2, lats=murlat2)
+        
 
         sst = DS['analysed_sst']
         sst_err = DS['analysis_error']
+        
+        # Resize the variables to make the easier to handle
+        murlon2 = resize(murlon2, (1000,2000))
+        murlat2 = resize(murlat2, (1000,2000))
+
+        mur_grid_def = geometry.GridDefinition(lons=murlon2, lats=murlat2)
+    
+        sst_err = resize(sst_err[0,:,:], (1000,2000))
+        sst = resize(sst[0,:,:], (1000, 2000))
 
         #Read custom grid
         DS_bar = xr.open_dataset(custom_grid_file)
@@ -315,25 +341,33 @@ def download_MUR(date,obs_dir,custom_grid_file=None):
         barlat = DS_bar['lat']
         bar_grid_def = geometry.GridDefinition(lons=barlon, lats=barlat)
 
+        #print('hit2') 
         # Convert to barents
-        obs_container = image.ImageContainerNearest(sst.data[0,:,:], 
+        obs_container = image.ImageContainerNearest(sst[:,:], 
                             mur_grid_def, radius_of_influence=2000)
         obs_modelgrid = obs_container.resample(bar_grid_def)
         sst_bar = obs_modelgrid.image_data
-        obs_container = image.ImageContainerNearest(sst_err.data[0,:,:], 
+        #print('hit20')
+        obs_container = image.ImageContainerNearest(sst_err[:,:], 
                             mur_grid_def, radius_of_influence=2000)
         obs_modelgrid = obs_container.resample(bar_grid_def)
         sst_err2 = obs_modelgrid.image_data
+        #print('hit21')
         # Sematics
 
         # Remove nan values 
         sst_bar = sst_bar -273.15
         sst_bar[np.isnan(sst_bar)] = -3 
         sst_err2[np.isnan(sst_err2)] = 10
+        
+        err = np.expand_dims(sst_err2, axis=0)
+        err[err == 0] = 10
+        
+        #print('hit3')
         # Write to file
         ds = xr.Dataset(
                 {"sst": (('time','x', 'y'), np.expand_dims(sst_bar, axis=0)),
-                "error_std": (('time','x', 'y'), np.expand_dims(sst_err2, axis=0)),
+                "error_std": (('time','x', 'y'), err),
                 "lon": (('x', 'y'), barlon),
                 "lat": (('x', 'y'), barlat)},
                 coords={
@@ -341,7 +375,10 @@ def download_MUR(date,obs_dir,custom_grid_file=None):
                 },
                 )
         ds.to_netcdf(mur_dir+'MUR_'+date.strftime("%Y%m%d")+'.nc')
+        DS.close()
         cmd('rm '+mur_file)
+        #print('ferdig')
+        
 
 def download_SSMIS(date,obs_dir,custom_grid_file=None,keep_both=False):
     # Ta fra osisaf,
@@ -370,9 +407,12 @@ def download_SSMIS(date,obs_dir,custom_grid_file=None,keep_both=False):
             
             et[np.isnan(tt)] = 10
             tt[np.isnan(tt)] = -1
+            et[et == 0] = 10
+            
+            
             ds2 = xr.Dataset(
-                {"ice_conc": (('time','x', 'y'), ds['ice_conc'].data[:]),
-                "error_std": (('time','x', 'y'), ds['error_std'].data[:]),
+                {"ice_conc": (('time','x', 'y'), tt),
+                "error_std": (('time','x', 'y'), et),
                 "lon": (('x', 'y'), ds['lon'].data[:]),
                 "lat": (('x', 'y'), ds['lat'].data[:])},
                 coords={

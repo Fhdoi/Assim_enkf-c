@@ -46,7 +46,7 @@ end_date = datetime(2018,2,5)
 obs_list = ['AMSR','SSMIS','SMOS','MUR']
 
 if computer == 'met_local':
-    res_dir = '/home/sindre/PHD2/Work/Assim_backintime/Res/'
+    res_dir = '/home/sindremf/PHD2/Work/Assim_backintime/Res/'
     #ocn_res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     #ocn_his_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
     #ice_res_dir = "/home/sindremf/PHD2/Work/Test_assimiation/Resdir/"
@@ -54,7 +54,7 @@ if computer == 'met_local':
     grid_dir = '/home/sindremf/PHD2/Work/Barents/data_dir/org_files/barents_grd.nc'
     enkf_c_dir = "/home/sindremf/PHD2/Work/Assim_enkf-c/"
     obs_dir = '/home/sindremf/PHD2/Work/Observations/'
-    save_dir = '/home/sindremf/PHD2/Work/Test_assimiation/Assim_res/'
+    save_dir = '/home/sindremf/PHD2/Work/Assim_backintime/'
     Nens = 10 # This is maximum value, but not neccesarily the number used.
 elif computer == 'nebula':
     res_dir = '/nobackup/forsk/sm_sinfr/Results/barents/'
@@ -64,7 +64,7 @@ elif computer == 'nebula':
     save_dir = '/nobackup/forsk/sm_sinfr/Results/Assim_res/'
     Nens = 10 # This is maximum value, but not neccesarily the number used.
 elif computer == 'fram':
-    res_dir = '/cluster/work/users/sfr009/Results/barents/'
+    res_dir = '/cluster/work/users/sfr009/Results/barents/Res/'
     grid_dir = '/cluster/home/sfr009/metroms_apps/barents-2.5km/grid/barents_grd.nc'
     enkf_c_dir = '/cluster/work/users/sfr009/Assim_enkf-c/'
     obs_dir = '/cluster/work/users/sfr009/Observations/'
@@ -85,7 +85,7 @@ his_var = ['temp', 'aice_d']
 # this one is only for testing, more correct to do this within prep in case more ensembles are
 # finishing during assimilation
 if ens_count:
-    ens_count = et.count_ens(date=end_date,enkf_c_dir=enkf_c_dir,res_dir=res_dir)
+    ens_count = et.count_ens2(date=end_date,enkf_c_dir=enkf_c_dir,res_dir=res_dir)
     print(ens_count)
 
 # Prep the ensemble
@@ -95,7 +95,7 @@ if Prep:
                      ens_inn_dir=res_dir, enkf_c_dir =enkf_c_dir, 
                      res_type = 'ice', EnKF_var=EnKF_var,
                      his_var=his_var,backlog=3,Nens = Nens)
-    ens_count = et.count_ens(date=end_date,enkf_c_dir=enkf_c_dir,res_dir=res_dir)
+    ens_count = et.count_ens2(date=end_date,enkf_c_dir=enkf_c_dir,res_dir=res_dir)
 
 # copy and prep observations
 # See also Keguang code for download

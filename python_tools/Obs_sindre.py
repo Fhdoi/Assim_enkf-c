@@ -151,6 +151,10 @@ def download_amsr_Sindre(date, wdir, enkf_c_dir, add_barents = True):
         Err_bar = ds.createVariable('error_std', 'f4', ('time','dx2', 'dy2',))
         
         bar[0,:,:] = siconc_bar
+        
+        # Make sure that not errors are 0 as this will crash the assimilation
+        err3_bar[err3_bar == 0] = 10
+        
         Err_bar[0,:,:] = err3_bar
         
         ds.close()
