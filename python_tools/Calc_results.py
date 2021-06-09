@@ -32,7 +32,7 @@ def read_ens(j,var,file_str, pre_str,date,typed,day=-1,lvl=-10):
     return np.squeeze(A)
     
 
-def write_ice_hist(pre_str,file_str,histdir,date,ice_omit,Nens):
+def write_ice_hist(pre_str,file_str,histdir,date,ice_omit,Nens,nproc=11):
     filename = file_str+str(1).zfill(3)+pre_str+date.strftime("%Y-%m-%d")+'-00000.nc'
     
     ds = xr.open_dataset(filename)
@@ -41,7 +41,7 @@ def write_ice_hist(pre_str,file_str,histdir,date,ice_omit,Nens):
     for var in ds.variables:
         if var not in ice_omit:
             A = np.zeros(ds[var].shape+(Nens,))
-            A = Parallel(n_jobs=3)(delayed(read_ens)(j,var,file_str, pre_str,date,typed='ice',day=-1) for j in range(1, Nens+1))
+            A = Parallel(n_jobs=nproc)(delayed(read_ens)(j,var,file_str, pre_str,date,typed='ice',day=-1) for j in range(1, Nens+1))
             #for j in range(2, Nens+1):
             #    A[...,j-1] = read_ens(j,var,file_str, pre_str)
             
@@ -70,7 +70,7 @@ def write_ice_hist(pre_str,file_str,histdir,date,ice_omit,Nens):
     
     
     
-def write_ocean_hist(pre_str,file_str,histdir,date,ocean_var,Nens): 
+def write_ocean_hist(pre_str,file_str,histdir,date,ocean_var,Nens,nproc=11): 
 
     date2 = date - datetime.timedelta(days=7)
     filename = file_str+str(1).zfill(3)+pre_str+date2.strftime("%Y%m%d")+'_'+ date.strftime("%Y%m%d") +'.nc'
@@ -81,7 +81,7 @@ def write_ocean_hist(pre_str,file_str,histdir,date,ocean_var,Nens):
             print(var)
             for day in range(1,8):
                 date3 = date2 + datetime.timedelta(days=day)
-                A = Parallel(n_jobs=2)(delayed(read_ens)(j,var,file_str, pre_str,date,'ocean',day=day) for j in range(1, Nens+1))
+                A = Parallel(n_jobs=nproc)(delayed(read_ens)(j,var,file_str, pre_str,date,'ocean',day=day) for j in range(1, Nens+1))
                 
                 A = np.array(A)
                 dateut = date + datetime.timedelta(days=day)
@@ -121,7 +121,7 @@ def write_ocean_hist(pre_str,file_str,histdir,date,ocean_var,Nens):
                 ds_res.close()
     ds.close()
                 
-def write_ocean_surface(pre_str,file_str,histdir,date,ocean_var,var_4d,Nens): 
+def write_ocean_surface(pre_str,file_str,histdir,date,ocean_var,var_4d,Nens,nproc=11): 
 
     date2 = date - datetime.timedelta(days=7)
     filename = file_str+str(1).zfill(3)+pre_str+date2.strftime("%Y%m%d")+'_'+ date.strftime("%Y%m%d") +'.nc'
@@ -138,7 +138,7 @@ def write_ocean_surface(pre_str,file_str,histdir,date,ocean_var,var_4d,Nens):
             for day in range(1,8):
                 date3 = date2 + datetime.timedelta(days=day)
                 #print(day)
-                A = Parallel(n_jobs=2)(delayed(read_ens)(j,var,file_str, pre_str,date,'ocean',day=day,lvl=lvl) for j in range(1, Nens+1))
+                A = Parallel(n_jobs=nproc)(delayed(read_ens)(j,var,file_str, pre_str,date,'ocean',day=day,lvl=lvl) for j in range(1, Nens+1))
                 #print(day)
                 A = np.array(A)
                 dateut = date + datetime.timedelta(days=day)
@@ -165,7 +165,7 @@ def write_ocean_surface(pre_str,file_str,histdir,date,ocean_var,var_4d,Nens):
                 ds_res.close()
     ds.close()
               
-def write_ice_surface(pre_str,file_str,histdir,date,ice_omit,Nens):
+def write_ice_surface(pre_str,file_str,histdir,date,ice_omit,Nens,nproc=11):
     filename = file_str+str(1).zfill(3)+pre_str+date.strftime("%Y-%m-%d")+'-00000.nc'
     
     ds = xr.open_dataset(filename)
@@ -175,7 +175,7 @@ def write_ice_surface(pre_str,file_str,histdir,date,ice_omit,Nens):
         if var not in ice_omit:
             print(var)
             A = np.zeros(ds[var].shape+(Nens,))
-            A = Parallel(n_jobs=3)(delayed(read_ens)(j,var,file_str, pre_str,date,typed='ice',day=-1) for j in range(1, Nens+1))
+            A = Parallel(n_jobs=nproc)(delayed(read_ens)(j,var,file_str, pre_str,date,typed='ice',day=-1) for j in range(1, Nens+1))
             
             A = np.array(A)
             ds_res = xr.Dataset(
