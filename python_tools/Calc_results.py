@@ -1,7 +1,6 @@
 import xarray as xr
 import numpy as np
 import datetime
-import matplotlib.pyplot as plt
 from os.path import exists
 import multiprocessing
 from joblib import Parallel, delayed
@@ -15,15 +14,15 @@ def read_ens(j,var,file_str, pre_str,date,typed,day=-1,lvl=-10):
     ds2 = xr.open_dataset(file)
     
     #If only one date in the file (ice) not for ocean
-    print(day)
+    #print(day)
     if day == -1:
         A = ds2[var][:].data
     else:
         # if a specific level is defined
-        print('read')
-        print(lvl)
+        #print('read')
+        #print(lvl)
         if lvl > -2:
-            print(j)
+            #print(j)
             A = ds2[var][day,lvl,...].data
         else:
             A = ds2[var][day,...].data                
@@ -88,10 +87,10 @@ def write_ocean_hist(pre_str,file_str,histdir,date,ocean_var,Nens,nproc=11):
                 mean = np.mean(A,0)
                 std = np.std(A,0)
                 
-                if var == 'u' or var == 'ubar':
+                if var == 'u' or var == 'ubar' or var == 'sustr':
                     xvar = 'xu'
                     yvar = 'yu'
-                elif var == 'v' or var == 'vbar':
+                elif var == 'v' or var == 'vbar' or var == 'svstr':
                     xvar = 'xv'
                     yvar = 'yv'
                 else:
@@ -114,10 +113,10 @@ def write_ocean_hist(pre_str,file_str,histdir,date,ocean_var,Nens,nproc=11):
                      var+'_std': ((zvar,xvar, yvar), std),
                     },
                     )
-                if exists(histdir+'Ensemble_stat_hist'+date.strftime("%Y%m%d")+'.nc'):
-                    ds_res.to_netcdf(histdir+'Ensemble_stat_hist'+date.strftime("%Y%m%d")+'.nc', mode = 'a')
+                if exists(histdir+'Ensemble_stat_hist'+date3.strftime("%Y%m%d")+'.nc'):
+                    ds_res.to_netcdf(histdir+'Ensemble_stat_hist'+date3.strftime("%Y%m%d")+'.nc', mode = 'a')
                 else:
-                    ds_res.to_netcdf(histdir+'Ensemble_stat_hist'+date.strftime("%Y%m%d")+'.nc', mode = 'w')
+                    ds_res.to_netcdf(histdir+'Ensemble_stat_hist'+date3.strftime("%Y%m%d")+'.nc', mode = 'w')
                 ds_res.close()
     ds.close()
                 
@@ -158,7 +157,7 @@ def write_ocean_surface(pre_str,file_str,histdir,date,ocean_var,var_4d,Nens,npro
                 {var: (('Nens',xvar, yvar), A),
                 },
                 )
-                if exists(histdir+'Ensemble_surface'+date.strftime("%Y%m%d")+'.nc'):
+                if exists(histdir+'Ensemble_surface'+date3.strftime("%Y%m%d")+'.nc'):
                     ds_res.to_netcdf(histdir+'Ensemble_surface'+date3.strftime("%Y%m%d")+'.nc', mode = 'a')
                 else:
                     ds_res.to_netcdf(histdir+'Ensemble_surface'+date3.strftime("%Y%m%d")+'.nc', mode = 'w')
@@ -187,6 +186,7 @@ def write_ice_surface(pre_str,file_str,histdir,date,ice_omit,Nens,nproc=11):
                 ds_res.to_netcdf(histdir+'Ensemble_surface'+date.strftime("%Y%m%d")+'.nc', mode = 'a')
             else:
                 ds_res.to_netcdf(histdir+'Ensemble_surface'+date.strftime("%Y%m%d")+'.nc', mode = 'w')
+            print(histdir+'Ensemble_surface'+date.strftime("%Y%m%d")+'.nc')
             ds_res.close()
     ds.close()
     
